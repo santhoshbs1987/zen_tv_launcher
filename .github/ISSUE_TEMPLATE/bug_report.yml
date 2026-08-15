@@ -1,0 +1,50 @@
+name: Bug report
+description: Create a report to help us improve Zen TV
+title: "[BUG] <title>"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a bug!
+  - type: input
+    id: device
+    attributes:
+      label: TV / Device Model
+      description: e.g. Xiaomi Mi TV 4A 32", Fire TV Stick 4K, Chromecast with Google TV
+      placeholder: Xiaomi Mi TV 4A 32"
+    validations:
+      required: true
+  - type: input
+    id: android_version
+    attributes:
+      label: Android TV Version / API Level
+      description: e.g. Android 9 (Pie / API 28)
+      placeholder: Android 9 (API 28)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How to trigger the issue using remote D-pad controls.
+      value: |
+        1. Open Zen TV
+        2. Navigate D-pad to ...
+        3. Press ...
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: false
