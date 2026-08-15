@@ -16,7 +16,7 @@ import androidx.tv.material3.Surface
 import com.ekshana.tv.launcher.data.AppRepository
 import com.ekshana.tv.launcher.ui.home.HomeScreen
 import com.ekshana.tv.launcher.ui.theme.DarkBg
-import com.ekshana.tv.launcher.ui.theme.FastLauncherTheme
+import com.ekshana.tv.launcher.ui.theme.ZenTvTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FastLauncherTheme {
+            ZenTvTheme {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()

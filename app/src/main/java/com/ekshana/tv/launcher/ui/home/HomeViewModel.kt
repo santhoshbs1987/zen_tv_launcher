@@ -76,7 +76,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-                val pm = context.packageManager
                 val packages = AppRepository.rawApps.value.map { it.packageName }
                 for (pkg in packages) {
                     if (pkg != context.packageName) {

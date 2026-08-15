@@ -20,7 +20,7 @@ private val LauncherColorScheme = darkColorScheme(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun FastLauncherTheme(content: @Composable () -> Unit) {
+fun ZenTvTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LauncherColorScheme,
         typography  = Typography,
