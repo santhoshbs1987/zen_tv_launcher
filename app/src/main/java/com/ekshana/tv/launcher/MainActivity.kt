@@ -51,21 +51,24 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Intercept Mi TV Remote Hardware Keys:
-     * - Mi Button / PatchWall button: keycode 3 or custom vendor keys
-     * - Dedicated Menu button (KEYCODE_MENU)
-     * - TV Input / Source key (KEYCODE_TV_INPUT, KEYCODE_INPUT_SELECT)
-     * - Settings / Guide / Live TV
+     * Intercept 11-Button Mi TV Remote Keys:
+     * 1. Power (Top)
+     * 2. D-pad Circle (Up, Down, Left, Right, Center/OK)
+     * 3. Home Button (Pentagon / Outline icon) -> Returns directly to Zen TV home
+     * 4. Back Button (< Arrow) -> Handled by Compose BackHandler
+     * 5. Menu Button (☰ 3 horizontal bars) -> Opens Settings when on Home, or Context Menu on focused app
+     * 6. Volume +/- Rocker
      */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event?.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
             when (keyCode) {
+                // Settings & Guide shortcuts
                 KeyEvent.KEYCODE_SETTINGS,
                 KeyEvent.KEYCODE_GUIDE -> {
                     menuPressedTrigger = System.currentTimeMillis()
                     return true
                 }
-                // Mi TV & standard Android TV Input / Source keys
+                // Source / Input switching keys
                 KeyEvent.KEYCODE_TV_INPUT,
                 KeyEvent.KEYCODE_TV_INPUT_COMPOSITE_1,
                 KeyEvent.KEYCODE_TV_INPUT_HDMI_1,
@@ -75,12 +78,6 @@ class MainActivity : ComponentActivity() {
                 KeyEvent.KEYCODE_TV_RADIO_SERVICE,
                 KeyEvent.KEYCODE_TV_TERRESTRIAL_ANALOG,
                 KeyEvent.KEYCODE_TV_TERRESTRIAL_DIGITAL -> {
-                    inputPressedTrigger = System.currentTimeMillis()
-                    return true
-                }
-                // Xiaomi PatchWall / Mi Key: remap to Settings or Input Switcher instead of bloated stock PatchWall
-                KeyEvent.KEYCODE_BUTTON_START,
-                KeyEvent.KEYCODE_PROG_RED -> {
                     inputPressedTrigger = System.currentTimeMillis()
                     return true
                 }
