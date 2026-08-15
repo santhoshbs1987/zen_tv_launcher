@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Fast Launcher"
+rootProject.name = "Zen TV"
 include(":app")

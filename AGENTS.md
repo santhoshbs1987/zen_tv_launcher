@@ -1,6 +1,6 @@
 # AGENTS.md — Developer & AI Pair Programming Guide for Zen TV
 
-This document provides architectural standards, device constraints, and engineering guidelines for developers and AI agents working on **Zen TV** (formerly FastLauncher).
+This document provides architectural standards, device constraints, and engineering guidelines for developers and AI agents working on **Zen TV**.
 
 ---
 

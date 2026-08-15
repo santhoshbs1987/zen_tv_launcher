@@ -189,7 +189,7 @@ object AppRepository {
     fun isFavorite(packageName: String): Boolean = _favorites.value.contains(packageName)
     fun isHidden(packageName: String): Boolean = _hiddenApps.value.contains(packageName)
 
-    private const val PREFS_NAME = "fastlauncher_prefs"
+    private const val PREFS_NAME = "zentv_prefs"
     private const val KEY_FAVORITES = "favorites"
     private const val KEY_FAVORITES_ORDERED = "favorites_ordered"
     private const val KEY_HIDDEN = "hidden_apps"
