@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="320dp"
+    android:height="180dp"
+    android:viewportWidth="320"
+    android:viewportHeight="180">
+
+    <!-- Leanback TV Banner Background with deep subtle gradient -->
+    <path
+        android:pathData="M0,0h320v180h-320z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="320"
+                android:endY="180"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#07090E" />
+                <item android:offset="0.5" android:color="#0E131F" />
+                <item android:offset="1.0" android:color="#161C2C" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Subtle Ambient Glow -->
+    <path
+        android:fillColor="#0D00F0FF"
+        android:pathData="M 80,90 A 50,50 0 1 1 79.9,90" />
+
+    <!-- Left Icon: Zen Ensō Ring -->
+    <path
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M 80,48 A 36,36 0 1 1 54,60">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="44"
+                android:startY="48"
+                android:endX="116"
+                android:endY="120"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#00F0FF" />
+                <item android:offset="0.5" android:color="#38BDF8" />
+                <item android:offset="1.0" android:color="#818CF8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- TV Screen Frame inside Banner -->
+    <path
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 64,74 L 96,74 C 98.2,74 100,75.8 100,78 L 100,98 C 100,100.2 98.2,102 96,102 L 64,102 C 61.8,102 60,100.2 60,98 L 60,78 C 60,75.8 61.8,74 64,74 Z">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="60"
+                android:startY="74"
+                android:endX="100"
+                android:endY="102"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF" />
+                <item android:offset="1.0" android:color="#00F0FF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- TV Antennas -->
+    <path
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeColor="#00F0FF"
+        android:pathData="M 72,66 L 79,74 M 88,66 L 81,74" />
+
+    <!-- Play Icon Center -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M 76,82 L 86,88 L 76,94 Z" />
+
+    <!-- TV Stand Base -->
+    <path
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeColor="#38BDF8"
+        android:pathData="M 74,102 L 71,108 M 86,102 L 89,108 M 68,108 L 92,108" />
+
+    <!-- "ZEN" Title Letterforms (Vector Path) -->
+    <!-- Z -->
+    <path
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FFFFFF"
+        android:pathData="M 135,76 L 157,76 L 135,104 L 157,104" />
+
+    <!-- E -->
+    <path
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FFFFFF"
+        android:pathData="M 191,76 L 169,76 L 169,104 L 191,104 M 169,90 L 187,90" />
+
+    <!-- N -->
+    <path
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FFFFFF"
+        android:pathData="M 203,104 L 203,76 L 225,104 L 225,76" />
+
+    <!-- "TV" Accent Highlight -->
+    <!-- T -->
+    <path
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeColor="#00F0FF"
+        android:pathData="M 239,78 L 257,78 M 248,78 L 248,104" />
+
+    <!-- V -->
+    <path
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#00F0FF"
+        android:pathData="M 262,78 L 271,104 L 280,78" />
+
+    <!-- Subtitle: ULTRA LIGHT LAUNCHER -->
+    <path
+        android:strokeWidth="1.5"
+        android:strokeColor="#64748B"
+        android:pathData="M 135,116 L 280,116" />
+
+</vector>
