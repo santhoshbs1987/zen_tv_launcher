@@ -12,7 +12,7 @@ This document provides architectural standards, device constraints, and engineer
 
 ## 📐 Hardware Specifications & Constraints
 
-- **Target Device Profile**: Xiaomi Mi TV 4A 32" (`amelie`), Android TV 9 (API 28 / Pie).
+- **Target Device Profile**: Xiaomi Mi TV 4A / 4C 32" (`MiTV4I` / `magnolia` / `amelie`), Android TV 9 (API 28 / Pie).
 - **RAM**: 1 GB Total (Launcher must idle at **≤ 35 MB PSS** to reserve RAM for heavy streaming apps).
 - **Display Framebuffer**: `1280x720` physical resolution (720p HD) at `213 dpi` (TVDPI).
 - **Safe Viewport Margins**: Minimum **`44dp` horizontal** and **`16dp` vertical** overscan padding on all root containers.
