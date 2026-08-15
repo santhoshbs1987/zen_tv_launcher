@@ -49,6 +49,7 @@ import java.util.Locale
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
     menuPressedTrigger: Long = 0L,
+    inputPressedTrigger: Long = 0L,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lastFocusedPackage by viewModel.lastFocusedPackage.collectAsStateWithLifecycle()
@@ -75,14 +76,25 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(inputPressedTrigger) {
+        if (inputPressedTrigger > 0L) {
+            showInputSwitcher = !showInputSwitcher
+        }
+    }
+
     var hasRestoredFocus by remember { mutableStateOf(false) }
-    LaunchedEffect(lastFocusedPackage, showSettings, selectedContextApp, showInputSwitcher) {
+    LaunchedEffect(lastFocusedPackage, showSettings, selectedContextApp, showInputSwitcher, uiState.isLoading) {
         val isOverlayOpen = showSettings || selectedContextApp != null || showInputSwitcher
-        if (!isOverlayOpen && lastFocusedPackage != null && !hasRestoredFocus) {
-            delay(120)
+        if (!isOverlayOpen && !uiState.isLoading) {
+            delay(100)
             try {
-                focusRequesters[lastFocusedPackage]?.requestFocus()
-                hasRestoredFocus = true
+                val targetPkg = lastFocusedPackage 
+                    ?: uiState.favorites.firstOrNull()?.packageName 
+                    ?: uiState.allApps.firstOrNull()?.packageName
+                if (targetPkg != null) {
+                    focusRequesters[targetPkg]?.requestFocus()
+                    hasRestoredFocus = true
+                }
             } catch (_: Exception) { /* ignore */ }
         }
     }

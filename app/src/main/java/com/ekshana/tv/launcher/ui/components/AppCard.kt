@@ -73,10 +73,29 @@ fun AppCard(
     val cardModifier = baseModifier.onPreviewKeyEvent { keyEvent ->
         val native = keyEvent.nativeKeyEvent
         val code = native.keyCode
-        if (code == KeyEvent.KEYCODE_MENU || code == KeyEvent.KEYCODE_GUIDE || code == KeyEvent.KEYCODE_INFO || code == KeyEvent.KEYCODE_PROG_BLUE) {
-            if (native.action == KeyEvent.ACTION_DOWN && native.repeatCount == 0) {
-                onLongClick()
-                return@onPreviewKeyEvent true
+        val isActionDown = native.action == KeyEvent.ACTION_DOWN
+        val isFirstDown = isActionDown && native.repeatCount == 0
+
+        when (code) {
+            KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_GUIDE,
+            KeyEvent.KEYCODE_INFO,
+            KeyEvent.KEYCODE_PROG_BLUE,
+            KeyEvent.KEYCODE_BOOKMARK,
+            KeyEvent.KEYCODE_BUTTON_Y -> {
+                if (isFirstDown) {
+                    onLongClick()
+                    return@onPreviewKeyEvent true
+                }
+            }
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_NUMPAD_ENTER,
+            KeyEvent.KEYCODE_BUTTON_A -> {
+                if (isFirstDown) {
+                    onClick()
+                    return@onPreviewKeyEvent true
+                }
             }
         }
         false
