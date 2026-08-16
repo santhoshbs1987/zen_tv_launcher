@@ -85,7 +85,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 launch(Dispatchers.Main) {
                     Toast.makeText(context, "⚡ Memory cleaned! TV RAM freed.", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 launch(Dispatchers.Main) {
                     Toast.makeText(context, "Memory cleaned!", Toast.LENGTH_SHORT).show()
                 }
@@ -107,22 +107,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun uninstallApp(context: Context, packageName: String) {
         try {
-            val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE).apply {
+            val intent = Intent(Intent.ACTION_DELETE).apply {
                 data = Uri.fromParts("package", packageName, null)
-                putExtra(Intent.EXTRA_RETURN_RESULT, true)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
         } catch (_: Exception) {
-            try {
-                val intent = Intent(Intent.ACTION_DELETE).apply {
-                    data = Uri.fromParts("package", packageName, null)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-            } catch (_: Exception) {
-                Toast.makeText(context, "Cannot uninstall this app", Toast.LENGTH_SHORT).show()
-            }
+            Toast.makeText(context, "Cannot uninstall this app", Toast.LENGTH_SHORT).show()
         }
     }
 
