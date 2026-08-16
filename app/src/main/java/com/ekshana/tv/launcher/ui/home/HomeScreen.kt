@@ -1,17 +1,23 @@
 package com.ekshana.tv.launcher.ui.home
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,23 +28,14 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
+import com.ekshana.tv.launcher.R
 import com.ekshana.tv.launcher.data.AppInfo
 import com.ekshana.tv.launcher.data.TvInputManagerHelper
 import com.ekshana.tv.launcher.ui.components.AllAppsGrid
 import com.ekshana.tv.launcher.ui.components.AppContextMenu
-import com.ekshana.tv.launcher.ui.components.FavoritesRow
 import com.ekshana.tv.launcher.ui.components.TvInputSwitcherDialog
 import com.ekshana.tv.launcher.ui.settings.SettingsScreen
-import com.ekshana.tv.launcher.ui.theme.AccentCyan
-import com.ekshana.tv.launcher.ui.theme.BackgroundGradient
-import com.ekshana.tv.launcher.ui.theme.CardBg
-import com.ekshana.tv.launcher.ui.theme.CardBorderIdle
-import com.ekshana.tv.launcher.ui.theme.CardFocusedBg
-import com.ekshana.tv.launcher.ui.theme.DialogBg
-import com.ekshana.tv.launcher.ui.theme.FocusBorderColor
-import com.ekshana.tv.launcher.ui.theme.TextMuted
-import com.ekshana.tv.launcher.ui.theme.TextPrimary
-import com.ekshana.tv.launcher.ui.theme.TextSecondary
+import com.ekshana.tv.launcher.ui.theme.*
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -60,12 +57,35 @@ fun HomeScreen(
     var showSettings by remember { mutableStateOf(false) }
     var showInputSwitcher by remember { mutableStateOf(false) }
 
-    val focusRequesters = remember { mutableStateMapOf<String, FocusRequester>() }
+    val gridFocusRequesters = remember { mutableStateMapOf<String, FocusRequester>() }
 
-    LaunchedEffect(uiState.rawApps) {
-        uiState.rawApps.forEach { app ->
-            if (!focusRequesters.containsKey(app.packageName)) {
-                focusRequesters[app.packageName] = FocusRequester()
+    // Prepend Inputs card and Settings card in the first row
+    val tvInputApp = remember {
+        AppInfo(
+            label = "Inputs",
+            packageName = "com.ekshana.tv.launcher.inputs",
+            iconBitmap = null
+        )
+    }
+
+    val androidSettingsApp = remember {
+        AppInfo(
+            label = "Settings",
+            packageName = "com.ekshana.tv.launcher.settings",
+            iconBitmap = null
+        )
+    }
+
+    val displayApps = remember(uiState.allApps) {
+        listOf(tvInputApp, androidSettingsApp) + uiState.allApps.filter {
+            it.packageName != tvInputApp.packageName && it.packageName != androidSettingsApp.packageName
+        }
+    }
+
+    LaunchedEffect(displayApps) {
+        displayApps.forEach { app ->
+            if (!gridFocusRequesters.containsKey(app.packageName)) {
+                gridFocusRequesters[app.packageName] = FocusRequester()
             }
         }
     }
@@ -82,26 +102,17 @@ fun HomeScreen(
         }
     }
 
-    var hasRestoredFocus by remember { mutableStateOf(false) }
-    LaunchedEffect(lastFocusedPackage, showSettings, selectedContextApp, showInputSwitcher, uiState.isLoading) {
+    LaunchedEffect(showSettings, selectedContextApp, showInputSwitcher, uiState.isLoading) {
         val isOverlayOpen = showSettings || selectedContextApp != null || showInputSwitcher
         if (!isOverlayOpen && !uiState.isLoading) {
-            delay(100)
+            delay(150)
             try {
-                val targetPkg = lastFocusedPackage 
-                    ?: uiState.favorites.firstOrNull()?.packageName 
-                    ?: uiState.allApps.firstOrNull()?.packageName
+                val targetPkg = lastFocusedPackage
+                    ?: displayApps.firstOrNull()?.packageName
                 if (targetPkg != null) {
-                    focusRequesters[targetPkg]?.requestFocus()
-                    hasRestoredFocus = true
+                    gridFocusRequesters[targetPkg]?.requestFocus()
                 }
             } catch (_: Exception) { /* ignore */ }
-        }
-    }
-
-    LaunchedEffect(focusedAppLabel) {
-        if (focusedAppLabel != null) {
-            hasRestoredFocus = true
         }
     }
 
@@ -119,7 +130,6 @@ fun HomeScreen(
             onShowInputSwitcher = { showInputSwitcher = true },
             onBack = {
                 showSettings = false
-                hasRestoredFocus = false
             },
         )
         return
@@ -130,7 +140,6 @@ fun HomeScreen(
             .fillMaxSize()
             .background(BackgroundGradient),
     ) {
-        // ---- PREMIUM LOADING SPLASH SCREEN ----
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -140,70 +149,56 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(DialogBg),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "⚡",
-                            fontSize = 36.sp,
-                        )
-                    }
-                    Spacer(Modifier.height(16.dp))
                     Text(
                         text = "Zen Launcher",
-                        fontSize = 22.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = StatusTextPrimary,
                         letterSpacing = 0.5.sp
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = "Starting up…",
-                        fontSize = 12.5.sp,
-                        color = AccentCyan,
-                        fontWeight = FontWeight.Medium
                     )
                 }
             }
         } else {
-            // ---- MAIN HOME UI ----
             Column(modifier = Modifier.fillMaxSize()) {
-                TopBar(
-                    focusedAppLabel = focusedAppLabel,
+                // Top Status Bar (24-hour clock, Wi-Fi, Settings, Inputs)
+                TopStatusBar(
                     onInputsClick = { showInputSwitcher = true },
-                    onCleanRamClick = { viewModel.cleanRam(context) },
                     onSettingsClick = { showSettings = true }
                 )
 
-                if (uiState.favorites.isNotEmpty()) {
-                    FavoritesRow(
-                        favorites = uiState.favorites,
-                        focusRequesters = focusRequesters,
-                        onAppClick = {
-                            hasRestoredFocus = false
-                            viewModel.launchApp(context, it.packageName)
-                        },
-                        onAppLongClick = { app -> selectedContextApp = app },
-                        onAppFocused = { app ->
-                            focusedAppLabel = app.label
-                            viewModel.setLastFocusedPackage(app.packageName)
-                        },
-                        modifier = Modifier.padding(bottom = 12.dp),
-                    )
-                }
+                Spacer(Modifier.height(14.dp))
 
+                // Unified All Apps Grid (with Inputs and Settings in first positions)
                 AllAppsGrid(
-                    apps = uiState.allApps,
-                    focusRequesters = focusRequesters,
-                    onAppClick = {
-                        hasRestoredFocus = false
-                        viewModel.launchApp(context, it.packageName)
+                    apps = displayApps,
+                    focusRequesters = gridFocusRequesters,
+                    onAppClick = { app ->
+                        when (app.packageName) {
+                            tvInputApp.packageName -> {
+                                showInputSwitcher = true
+                            }
+                            androidSettingsApp.packageName -> {
+                                try {
+                                    val intent = Intent(Settings.ACTION_SETTINGS).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(intent)
+                                } catch (_: ActivityNotFoundException) {
+                                    showSettings = true
+                                }
+                            }
+                            else -> {
+                                viewModel.launchApp(context, app.packageName)
+                            }
+                        }
                     },
-                    onAppLongClick = { app -> selectedContextApp = app },
+                    onAppLongClick = { app ->
+                        when (app.packageName) {
+                            tvInputApp.packageName -> showInputSwitcher = true
+                            androidSettingsApp.packageName -> showSettings = true
+                            else -> selectedContextApp = app
+                        }
+                    },
                     onAppFocused = { app ->
                         focusedAppLabel = app.label
                         viewModel.setLastFocusedPackage(app.packageName)
@@ -240,164 +235,118 @@ fun HomeScreen(
     }
 }
 
-// -------------------------------------------------------------------------
-// Ultra-Modern Glassmorphic TopBar (Clock at the End)
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Top Status Bar with crisp vector icons (Wi-Fi, Gear, Sliders)
+// -----------------------------------------------------------------------------
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun TopBar(
-    focusedAppLabel: String?,
+private fun TopStatusBar(
     onInputsClick: () -> Unit,
-    onCleanRamClick: () -> Unit,
     onSettingsClick: () -> Unit,
 ) {
-    var timeStr by remember { mutableStateOf(formattedTime()) }
-    var dateStr by remember { mutableStateOf(formattedDate()) }
+    var timeStr by remember { mutableStateOf(formatted24hTime()) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(30_000L)
-            timeStr = formattedTime()
-            dateStr = formattedDate()
+            delay(15_000L)
+            timeStr = formatted24hTime()
         }
     }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 44.dp, end = 44.dp, top = 16.dp, bottom = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(start = 44.dp, end = 44.dp, top = 22.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Left: App Title with Accent Pill & Ambient Focus Tracker
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(AccentCyan)
-            )
-            Spacer(Modifier.width(10.dp))
-            Text(
-                text = "Zen Launcher",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary,
-                letterSpacing = 0.4.sp,
-            )
+        // 24h Clock (e.g. 22:57)
+        Text(
+            text = timeStr,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Medium,
+            color = StatusTextPrimary,
+            letterSpacing = 0.5.sp,
+        )
 
-            if (focusedAppLabel != null) {
-                Spacer(Modifier.width(12.dp))
-                Box(
-                    modifier = Modifier
-                        .size(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(TextMuted)
-                )
-                Spacer(Modifier.width(12.dp))
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(DialogBg)
-                        .padding(horizontal = 10.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = focusedAppLabel,
-                        fontSize = 12.5.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = AccentCyan,
-                        maxLines = 1,
-                    )
-                }
-            }
-        }
+        Spacer(Modifier.width(18.dp))
 
-        // Right: Action Buttons followed by Clock at the very end
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            TopBarButton(
-                text = "🔌  Inputs",
-                textColor = TextPrimary,
-                onClick = onInputsClick
-            )
+        // Wi-Fi Icon
+        Image(
+            painter = painterResource(R.drawable.ic_wifi),
+            contentDescription = "Wi-Fi",
+            colorFilter = ColorFilter.tint(StatusIconColor),
+            modifier = Modifier.size(19.dp)
+        )
 
-            TopBarButton(
-                text = "⚡  Clean RAM",
-                textColor = AccentCyan,
-                onClick = onCleanRamClick
-            )
+        Spacer(Modifier.width(14.dp))
 
-            TopBarButton(
-                text = "⚙  Settings",
-                textColor = TextPrimary,
-                onClick = onSettingsClick
-            )
-
-            Spacer(Modifier.width(4.dp))
-
-            // Minimalist Clock placed at the very end
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(start = 6.dp)
-            ) {
-                Text(
-                    text = timeStr,
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    letterSpacing = 0.4.sp,
-                )
-                Text(
-                    text = dateStr,
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = TextSecondary,
+        // Settings Icon Button
+        StatusIconButton(
+            onClick = onSettingsClick,
+            content = { isFocused ->
+                Image(
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = "Settings",
+                    colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
+                    modifier = Modifier.size(19.dp)
                 )
             }
-        }
+        )
+
+        Spacer(Modifier.width(10.dp))
+
+        // TV Inputs / Slider Controls Icon Button
+        StatusIconButton(
+            onClick = onInputsClick,
+            content = { isFocused ->
+                Image(
+                    painter = painterResource(R.drawable.ic_tune),
+                    contentDescription = "Inputs",
+                    colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+        )
     }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun TopBarButton(
-    text: String,
-    textColor: Color,
+private fun StatusIconButton(
     onClick: () -> Unit,
+    content: @Composable (isFocused: Boolean) -> Unit,
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+
     Button(
         onClick = onClick,
-        shape = ButtonDefaults.shape(shape = RoundedCornerShape(10.dp)),
+        shape = ButtonDefaults.shape(shape = CircleShape),
         border = ButtonDefaults.border(
             border = Border(
-                border = BorderStroke(1.dp, CardBorderIdle),
-                shape = RoundedCornerShape(10.dp)
+                border = BorderStroke(0.dp, Color.Transparent),
+                shape = CircleShape
             ),
             focusedBorder = Border(
-                border = BorderStroke(2.dp, FocusBorderColor),
-                shape = RoundedCornerShape(10.dp)
+                border = BorderStroke(2.dp, Color.White),
+                shape = CircleShape
             )
         ),
         colors = ButtonDefaults.colors(
-            containerColor = CardBg,
-            focusedContainerColor = CardFocusedBg
+            containerColor = Color.Transparent,
+            focusedContainerColor = Color(0x35FFFFFF)
         ),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+        contentPadding = PaddingValues(5.dp),
+        modifier = Modifier
+            .size(32.dp)
+            .onFocusChanged { isFocused = it.isFocused }
     ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontSize = 11.5.sp,
-            fontWeight = FontWeight.Medium,
-        )
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            content(isFocused)
+        }
     }
 }
 
-private fun formattedTime(): String =
-    SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
-
-private fun formattedDate(): String =
-    SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(Date())
+private fun formatted24hTime(): String =
+    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())

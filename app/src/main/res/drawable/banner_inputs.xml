@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="54dp"
+    android:viewportWidth="96"
+    android:viewportHeight="54">
+    
+    <!-- Background Gradient Surface -->
+    <path
+        android:pathData="M0,0h96v54h-96z"
+        android:fillColor="#0284C7" />
+        
+    <!-- TV Inputs Banner Graphic -->
+    <!-- Input Cable / Connector -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M38,20h20v14h-20z" />
+    <path
+        android:fillColor="#BAE6FD"
+        android:pathData="M43,15h3v5h-3zM50,15h3v5h-3z" />
+    <path
+        android:fillColor="#0369A1"
+        android:pathData="M42,24h12v6h-12z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M46,34h4v6h-4z" />
+        
+    <!-- Text / Subtitle -->
+    <path
+        android:fillColor="#E0F2FE"
+        android:pathData="M32,44h32v2h-32z" />
+</vector>

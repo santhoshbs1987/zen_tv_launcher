@@ -3,45 +3,40 @@ package com.ekshana.tv.launcher.ui.theme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// ── Ultra-Modern OLED & Dark Ambient Palette ─────────────────────────────────
-val DeepSpaceBlack = Color(0xFF07090E)
-val ObsidianDark   = Color(0xFF0E131F)
-val SlateElevated  = Color(0xFF161C2C)
-val DarkBg         = Color(0xFF07090E) // Primary base
+// ── Apple TV / tvOS Refined Deep Glassmorphic Palette ────────────────────────
+val AppleTvBgTop          = Color(0xFF141923) // Deep rich dark indigo/slate
+val AppleTvBgMid          = Color(0xFF0D1117) // Ultra-smooth deep midnight
+val AppleTvBgBot          = Color(0xFF080B10) // Pure OLED base
 
-// ── Card Surface Tokens ──────────────────────────────────────────────────────
-val CardBg         = Color(0xFF141926)
-val CardFocusedBg  = Color(0xFF222B40)
-val CardBorderIdle = Color(0xFF1F283C)
+// ── Glass & Translucent Surface Tokens ────────────────────────────────────────
+val TopGlassContainerBg   = Color(0x1FFFFFFF) // Apple TV Frosted Glass container
+val TopGlassContainerBorder = Color(0x28FFFFFF) // Ultra-fine frosted border
 
-// ── Dialogs & Glassmorphism ──────────────────────────────────────────────────
-val DialogBg       = Color(0xFF131826)
-val DialogSurface  = Color(0xFF1C2438)
+val CardGlassBg           = Color(0x18FFFFFF) // Card glass surface
+val CardGlassBorder       = Color(0x24FFFFFF) // Subtle specular rim
+val CardGlassFocusedBorder = Color(0xFFFFFFFF) // Crisp white specular border
 
-// ── Accents & Focused Highlights (Electric Cyan / Aqua Neon) ─────────────────
-val AccentCyan     = Color(0xFF00F0FF)
-val AccentBlue     = Color(0xFF38BDF8)
-val AccentViolet   = Color(0xFF818CF8)
-val FocusBorderColor = Color(0xFF00F0FF)
+// Card Surfaces
+val CardLightBg           = Color(0xFFFFFFFF)
+val CardDarkBg            = Color(0xFF1C222C)
+val CardDefaultSurface    = Color(0xFF181D26)
+val CardFocusedGlow       = Color(0x80000000)
 
-// ── Typography Colors ────────────────────────────────────────────────────────
-val TextPrimary    = Color(0xFFF8FAFC)
-val TextSecondary  = Color(0xFF94A3B8)
-val TextMuted      = Color(0xFF64748B)
+// ── Typography & Icon Colors ──────────────────────────────────────────────────
+val StatusTextPrimary     = Color(0xFFF1F5F9) // Clean Apple SF style high-contrast light
+val StatusIconColor       = Color(0xFF94A3B8)
+val StatusIconActive      = Color(0xFFFFFFFF)
 
-// ── Modern Gradients ─────────────────────────────────────────────────────────
+val CardTextLight         = Color(0xFFFFFFFF)
+val CardTextDark          = Color(0xFF0F172A)
+val CardSubtextLight      = Color(0xFF94A3B8)
+val CardSubtextDark       = Color(0xFF64748B)
+
+// ── Background Gradients ──────────────────────────────────────────────────────
 val BackgroundGradient = Brush.verticalGradient(
     colors = listOf(
-        DeepSpaceBlack,
-        ObsidianDark,
-        DeepSpaceBlack
-    )
-)
-
-val CardGlowGradient = Brush.linearGradient(
-    colors = listOf(
-        Color(0xFF00F0FF),
-        Color(0xFF38BDF8),
-        Color(0xFF818CF8)
+        AppleTvBgTop,
+        AppleTvBgMid,
+        AppleTvBgBot
     )
 )

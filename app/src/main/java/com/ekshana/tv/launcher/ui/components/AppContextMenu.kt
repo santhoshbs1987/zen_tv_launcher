@@ -23,23 +23,8 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
 import com.ekshana.tv.launcher.data.AppInfo
-import com.ekshana.tv.launcher.ui.theme.AccentCyan
-import com.ekshana.tv.launcher.ui.theme.CardBg
-import com.ekshana.tv.launcher.ui.theme.CardBorderIdle
-import com.ekshana.tv.launcher.ui.theme.CardFocusedBg
-import com.ekshana.tv.launcher.ui.theme.DialogBg
-import com.ekshana.tv.launcher.ui.theme.FocusBorderColor
-import com.ekshana.tv.launcher.ui.theme.TextPrimary
-import com.ekshana.tv.launcher.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
 
-/**
- * Clean Single-Page TV Context Menu (Zero Scrolling Needed).
- *
- * Designed to fit 100% on-screen simultaneously so all options
- * (Favorite, Reorder, App Info, Hide, Uninstall, Close) are directly
- * navigable and selectable with D-pad without clipping or scroll lock.
- */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun AppContextMenu(
@@ -67,14 +52,14 @@ fun AppContextMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.82f)),
+            .background(Color.Black.copy(alpha = 0.65f)),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
                 .width(360.dp)
-                .clip(RoundedCornerShape(18.dp))
-                .background(DialogBg)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0xFF1E2530))
                 .padding(horizontal = 22.dp, vertical = 18.dp),
         ) {
             Column(
@@ -86,14 +71,14 @@ fun AppContextMenu(
                     text = app.label,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = Color.White,
                     maxLines = 1,
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = app.packageName,
                     fontSize = 10.5.sp,
-                    color = TextSecondary,
+                    color = Color(0xFF94A3B8),
                     maxLines = 1,
                 )
                 Spacer(Modifier.height(14.dp))
@@ -132,7 +117,7 @@ fun AppContextMenu(
 
                 // 3. App Info & Cache
                 MenuActionButton(
-                    text = "ℹ️  App Info & Cache",
+                    text = "ℹ️  App Info & Settings",
                     onClick = {
                         onAppInfo()
                         onDismiss()
@@ -166,7 +151,7 @@ fun AppContextMenu(
                 // 6. Close Menu
                 MenuActionButton(
                     text = "✕  Close Menu",
-                    textColor = AccentCyan,
+                    textColor = Color(0xFF38BDF8),
                     onClick = onDismiss
                 )
             }
@@ -180,7 +165,7 @@ private fun MenuActionButton(
     text: String,
     onClick: () -> Unit,
     focusRequester: FocusRequester? = null,
-    textColor: Color = TextPrimary,
+    textColor: Color = Color.White,
     modifier: Modifier = Modifier.fillMaxWidth(),
 ) {
     val btnModifier = if (focusRequester != null) {
@@ -192,22 +177,22 @@ private fun MenuActionButton(
     Button(
         onClick = onClick,
         modifier = btnModifier,
-        shape = ButtonDefaults.shape(shape = RoundedCornerShape(10.dp)),
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
         border = ButtonDefaults.border(
             border = Border(
-                border = BorderStroke(1.dp, CardBorderIdle),
-                shape = RoundedCornerShape(10.dp)
+                border = BorderStroke(1.dp, Color(0x20FFFFFF)),
+                shape = RoundedCornerShape(12.dp)
             ),
             focusedBorder = Border(
-                border = BorderStroke(2.dp, FocusBorderColor),
-                shape = RoundedCornerShape(10.dp)
+                border = BorderStroke(2.dp, Color.White),
+                shape = RoundedCornerShape(12.dp)
             )
         ),
         colors = ButtonDefaults.colors(
-            containerColor = CardBg,
-            focusedContainerColor = CardFocusedBg
+            containerColor = Color(0xFF28303E),
+            focusedContainerColor = Color(0xFF3B465A)
         ),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
             text = text,

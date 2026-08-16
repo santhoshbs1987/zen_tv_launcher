@@ -21,9 +21,10 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Singleton app repository.
  *
- * Fast icon pipeline:
- * - Maps ResolveInfo with `loadIcon(pm)` so native TV banner & adaptive icons decode properly
- * - Caches decoded 96x96 ImageBitmaps so icons are always ready and instant
+ * Fast icon & Leanback TV banner pipeline:
+ * - Checks ri.activityInfo.loadBanner(pm) or ri.activityInfo.applicationInfo.loadBanner(pm) first for official 16:9 / horizontal TV banners
+ * - Falls back to ri.loadIcon(pm) if no banner exists
+ * - Caches decoded ImageBitmaps so cards render instantly
  */
 object AppRepository {
 
@@ -84,13 +85,13 @@ object AppRepository {
     }
 
     /**
-     * Queries PackageManager, decodes proper ResolveInfo icons, caches them, and updates StateFlow.
+     * Queries PackageManager, decodes Leanback TV Banners or Icons, caches them, and updates StateFlow.
      */
     fun refresh() {
         scope.launch {
             val pm = appContext.packageManager
 
-            // 1. Android TV apps (Prime Video, Hotstar, Netflix, etc.)
+            // 1. Android TV apps (Prime Video, Hotstar, Netflix, YouTube, etc.)
             val tvIntent = Intent(Intent.ACTION_MAIN).apply {
                 addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
             }
@@ -115,11 +116,26 @@ object AppRepository {
                     cached
                 } else {
                     try {
-                        val drawable = ri.loadIcon(pm)
-                        val bmp = drawable.toBitmap(width = 96, height = 96, config = Bitmap.Config.ARGB_8888)
-                        val imgBmp = bmp.asImageBitmap()
-                        iconCache[pkg] = imgBmp
-                        imgBmp
+                        // Prioritize Leanback Banner (16:9 / horizontal TV banner)
+                        val bannerDrawable = try {
+                            ri.activityInfo.loadBanner(pm)
+                                ?: ri.activityInfo.applicationInfo.loadBanner(pm)
+                        } catch (_: Exception) {
+                            null
+                        }
+
+                        if (bannerDrawable != null) {
+                            val bmp = bannerDrawable.toBitmap(width = 240, height = 135, config = Bitmap.Config.ARGB_8888)
+                            val imgBmp = bmp.asImageBitmap()
+                            iconCache[pkg] = imgBmp
+                            imgBmp
+                        } else {
+                            val drawable = ri.loadIcon(pm)
+                            val bmp = drawable.toBitmap(width = 120, height = 120, config = Bitmap.Config.ARGB_8888)
+                            val imgBmp = bmp.asImageBitmap()
+                            iconCache[pkg] = imgBmp
+                            imgBmp
+                        }
                     } catch (_: Exception) {
                         null
                     }
@@ -132,6 +148,13 @@ object AppRepository {
             }.sortedBy { it.label.lowercase() }
 
             _rawApps.value = appList
+
+            // If user has no favorites configured yet, default to first 6 apps as favorites to show top pill
+            if (_favorites.value.isEmpty() && appList.isNotEmpty()) {
+                val defaultFavs = appList.take(6).map { it.packageName }
+                saveFavorites(defaultFavs)
+            }
+
             applyFilter()
         }
     }

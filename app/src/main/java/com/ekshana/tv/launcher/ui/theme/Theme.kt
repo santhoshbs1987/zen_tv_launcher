@@ -7,15 +7,14 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.darkColorScheme
 
-// TV launchers always render dark — no light-mode branch needed.
 private val LauncherColorScheme = darkColorScheme(
-    primary   = AccentBlue,
-    secondary = TextSecondary,
-    background = DarkBg,
-    surface   = CardBg,
-    onPrimary = TextPrimary,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
+    primary = StatusTextPrimary,
+    secondary = StatusIconColor,
+    background = AppleTvBgTop,
+    surface = CardLightBg,
+    onPrimary = CardTextLight,
+    onBackground = CardTextDark,
+    onSurface = CardTextDark,
 )
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -23,7 +22,7 @@ private val LauncherColorScheme = darkColorScheme(
 fun ZenLauncherTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LauncherColorScheme,
-        typography  = Typography,
-        content     = content,
+        typography = Typography,
+        content = content,
     )
 }
