@@ -39,7 +39,7 @@ import com.ekshana.tv.launcher.R
 import com.ekshana.tv.launcher.ui.theme.CardGlassBorder
 
 /**
- * Modern Landscape Squircle App Card matching Google TV / Apple TV aesthetics.
+ * Modern Landscape Squircle App Card.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -103,13 +103,14 @@ fun AppCard(
 
     val isTvInputs = packageName == "com.ekshana.tv.launcher.inputs"
     val isSettings = packageName == "com.ekshana.tv.launcher.settings"
-    val isBanner = (iconBitmap != null && iconBitmap.width > iconBitmap.height * 1.3f) || isTvInputs || isSettings
+    val isRamCleaner = packageName == "com.ekshana.tv.launcher.ramcleaner"
+    val isBanner = (iconBitmap != null && iconBitmap.width > iconBitmap.height * 1.3f) || isTvInputs || isSettings || isRamCleaner
     val style = remember(packageName, label) { getAppStyle(packageName, label) }
 
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.09f else 1.0f,
         animationSpec = tween(durationMillis = 180),
-        label = "appleTvCardScale"
+        label = "cardFocusScale"
     )
 
     Card(
@@ -180,7 +181,7 @@ fun AppCard(
             contentAlignment = Alignment.Center
         ) {
             if (isTvInputs) {
-                // TV Inputs Card Presentation (Centered Icon + Single Clean Label)
+                // TV Inputs Card Presentation
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -189,25 +190,26 @@ fun AppCard(
                                 listOf(Color(0xFF0284C7), Color(0xFF0369A1))
                             )
                         )
-                        .padding(horizontal = 14.dp),
+                        .padding(horizontal = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_tune),
                         contentDescription = "Inputs",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     )
-                    Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = "Inputs",
-                        fontSize = 15.sp,
+                        fontSize = 14.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        maxLines = 1
                     )
                 }
             } else if (isSettings) {
-                // Android Settings Card Presentation (Centered Icon + Single Clean Label)
+                // Android Settings Card Presentation
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -216,21 +218,51 @@ fun AppCard(
                                 listOf(Color(0xFF334155), Color(0xFF1E293B))
                             )
                         )
-                        .padding(horizontal = 14.dp),
+                        .padding(horizontal = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_settings),
                         contentDescription = "Settings",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     )
-                    Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = "Settings",
-                        fontSize = 15.sp,
+                        fontSize = 14.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        maxLines = 1
+                    )
+                }
+            } else if (isRamCleaner) {
+                // Free Memory / RAM Cleaner Card Presentation
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF059669), Color(0xFF047857))
+                            )
+                        )
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_bolt),
+                        contentDescription = "Free Memory",
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "Free Memory",
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             } else if (iconBitmap != null) {
@@ -243,7 +275,7 @@ fun AppCard(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    // Centered icon with Apple TV clean presentation
+                    // Centered icon with clean presentation
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -286,7 +318,7 @@ fun AppCard(
                 }
             }
 
-            // Apple TV Specular Top-Light Sheen
+            // Specular Top-Light Sheen
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -306,7 +338,7 @@ fun AppCard(
 }
 
 // -----------------------------------------------------------------------------
-// Curated Brand / App Styling System Matching tvOS Aesthetics
+// Curated Brand / App Styling System
 // -----------------------------------------------------------------------------
 
 data class AppCardStyle(
@@ -321,6 +353,13 @@ fun getAppStyle(packageName: String, label: String): AppCardStyle {
     val name = label.lowercase()
 
     return when {
+        // Free Memory
+        pkg.contains("ramcleaner") || name.contains("memory") -> AppCardStyle(
+            bgColor = Color(0xFF059669),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF059669), Color(0xFF047857)))
+        )
+
         // TV Inputs
         pkg.contains("inputs") || name.contains("inputs") -> AppCardStyle(
             bgColor = Color(0xFF0284C7),
@@ -356,8 +395,7 @@ fun getAppStyle(packageName: String, label: String): AppCardStyle {
             gradient = Brush.linearGradient(listOf(Color(0xFF00A8E1), Color(0xFF0072A0)))
         )
 
-        // Apple TV
-        pkg.contains("appletv") || name.contains("apple tv") -> AppCardStyle(
+        pkg.contains("appletv") -> AppCardStyle(
             bgColor = Color(0xFF1B1D22),
             textColor = Color.White,
             borderColor = Color(0x33FFFFFF)
@@ -451,7 +489,7 @@ fun getAppStyle(packageName: String, label: String): AppCardStyle {
             textColor = Color.White
         )
 
-        // Default tvOS Elevated Surface Fallback
+        // Default Surface Fallback
         else -> {
             val hash = (pkg.hashCode() and 0x7FFFFFFF) % 5
             when (hash) {

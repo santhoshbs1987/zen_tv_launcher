@@ -15,7 +15,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import com.ekshana.tv.launcher.data.AppRepository
 import com.ekshana.tv.launcher.ui.home.HomeScreen
-import com.ekshana.tv.launcher.ui.theme.AppleTvBgTop
+import com.ekshana.tv.launcher.ui.theme.ZenBgTop
 import com.ekshana.tv.launcher.ui.theme.ZenLauncherTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(AppleTvBgTop),
+                        .background(ZenBgTop),
                     shape = RectangleShape,
                 ) {
                     HomeScreen(
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Intercept Apple TV / Mi / Android TV Remote Keys:
+     * Intercept Remote Keys:
      * 1. Power (Top)
      * 2. D-pad Circle (Up, Down, Left, Right, Center/OK)
      * 3. Home Button -> Returns directly to Zen Launcher home

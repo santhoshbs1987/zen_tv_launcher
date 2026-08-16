@@ -1,20 +1,26 @@
 package com.ekshana.tv.launcher.ui.components
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -23,8 +29,12 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
 import com.ekshana.tv.launcher.data.AppInfo
+import com.ekshana.tv.launcher.ui.theme.*
 import kotlinx.coroutines.delay
 
+/**
+ * In-Hierarchy Floating Glass Context Menu Modal.
+ */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun AppContextMenu(
@@ -52,109 +62,134 @@ fun AppContextMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.65f)),
+            .background(ModalScrim),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .width(360.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFF1E2530))
-                .padding(horizontal = 22.dp, vertical = 18.dp),
+                .width(380.dp)
+                .shadow(28.dp, RoundedCornerShape(22.dp), ambientColor = Color.Black, spotColor = Color.Black)
+                .clip(RoundedCornerShape(22.dp))
+                .background(ModalGlassBg)
+                .border(BorderStroke(1.dp, ModalGlassBorder), RoundedCornerShape(22.dp))
+                .padding(horizontal = 24.dp, vertical = 20.dp),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                // Header
-                Text(
-                    text = app.label,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1,
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = app.packageName,
-                    fontSize = 10.5.sp,
-                    color = Color(0xFF94A3B8),
-                    maxLines = 1,
-                )
-                Spacer(Modifier.height(14.dp))
-
-                // 1. Favorite Toggle Button
-                MenuActionButton(
-                    text = if (isFavorite) "★  Remove from Favorites" else "☆  Add to Favorites",
-                    focusRequester = firstButtonRequester,
-                    onClick = {
-                        onToggleFavorite()
-                        onDismiss()
-                    }
-                )
-
-                // 2. Reorder controls if already favorite
-                if (isFavorite) {
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        MenuActionButton(
-                            text = "◀ Move Left",
-                            modifier = Modifier.weight(1f),
-                            onClick = { onMoveFavoriteLeft() }
+                // App Icon / Thumbnail & Header
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (app.iconBitmap != null) {
+                        Image(
+                            bitmap = app.iconBitmap,
+                            contentDescription = app.label,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
                         )
-                        MenuActionButton(
-                            text = "Move Right ▶",
-                            modifier = Modifier.weight(1f),
-                            onClick = { onMoveFavoriteRight() }
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    Column {
+                        Text(
+                            text = app.label,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = StatusTextPrimary,
+                            maxLines = 1,
+                        )
+                        Text(
+                            text = app.packageName,
+                            fontSize = 10.5.sp,
+                            color = StatusTextSecondary,
+                            maxLines = 1,
                         )
                     }
                 }
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(16.dp))
 
-                // 3. App Info & Cache
-                MenuActionButton(
-                    text = "ℹ️  App Info & Settings",
-                    onClick = {
-                        onAppInfo()
-                        onDismiss()
-                    }
-                )
+                // Actions List
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // 1. Hide / Unhide
+                    MenuActionButton(
+                        text = "👁  Hide from Home Grid",
+                        focusRequester = firstButtonRequester,
+                        onClick = {
+                            onToggleHide()
+                            onDismiss()
+                        }
+                    )
 
-                Spacer(Modifier.height(6.dp))
+                    // 2. App Info (System Details)
+                    MenuActionButton(
+                        text = "ℹ️  App Info & Permissions",
+                        onClick = {
+                            onAppInfo()
+                            onDismiss()
+                        }
+                    )
 
-                // 4. Hide App from Grid
-                MenuActionButton(
-                    text = "👁️  Hide App from Grid",
-                    onClick = {
-                        onToggleHide()
-                        onDismiss()
-                    }
-                )
+                    // 3. Uninstall App
+                    MenuActionButton(
+                        text = "🗑  Uninstall App",
+                        isDanger = true,
+                        onClick = {
+                            onUninstall()
+                            onDismiss()
+                        }
+                    )
+                }
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(14.dp))
 
-                // 5. Uninstall App
-                MenuActionButton(
-                    text = "🗑️  Uninstall App",
-                    onClick = {
-                        onUninstall()
-                        onDismiss()
-                    }
-                )
-
-                Spacer(Modifier.height(10.dp))
-
-                // 6. Close Menu
-                MenuActionButton(
-                    text = "✕  Close Menu",
-                    textColor = Color(0xFF38BDF8),
-                    onClick = onDismiss
-                )
+                // Close / Cancel Button
+                Button(
+                    onClick = onDismiss,
+                    shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
+                    border = ButtonDefaults.border(
+                        border = Border(
+                            border = BorderStroke(1.dp, ButtonGlassBorder),
+                            shape = RoundedCornerShape(14.dp)
+                        ),
+                        focusedBorder = Border(
+                            border = BorderStroke(2.dp, ButtonGlassFocusedBorder),
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                    ),
+                    colors = ButtonDefaults.colors(
+                        containerColor = ButtonGlassBg,
+                        focusedContainerColor = ButtonGlassFocusedBg
+                    ),
+                    contentPadding = PaddingValues(vertical = 10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Close",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = StatusTextSecondary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
+
+            // Top Specular Sheen
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+                    .align(Alignment.TopCenter)
+                    .background(ModalSheenGradient)
+            )
         }
     }
 }
@@ -164,41 +199,69 @@ fun AppContextMenu(
 private fun MenuActionButton(
     text: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isDanger: Boolean = false,
     focusRequester: FocusRequester? = null,
-    textColor: Color = Color.White,
-    modifier: Modifier = Modifier.fillMaxWidth(),
 ) {
-    val btnModifier = if (focusRequester != null) {
-        modifier.focusRequester(focusRequester)
-    } else {
+    var isFocused by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.04f else 1.0f,
+        animationSpec = tween(150),
+        label = "menuButtonScale"
+    )
+
+    val baseModifier = if (focusRequester != null) {
         modifier
+            .focusRequester(focusRequester)
+            .onFocusChanged { isFocused = it.isFocused }
+    } else {
+        modifier.onFocusChanged { isFocused = it.isFocused }
     }
 
     Button(
         onClick = onClick,
-        modifier = btnModifier,
-        shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
+        scale = ButtonDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
         border = ButtonDefaults.border(
             border = Border(
-                border = BorderStroke(1.dp, Color(0x20FFFFFF)),
-                shape = RoundedCornerShape(12.dp)
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = if (isDanger) Color(0x30EF4444) else ButtonGlassBorder
+                ),
+                shape = RoundedCornerShape(14.dp)
             ),
             focusedBorder = Border(
-                border = BorderStroke(2.dp, Color.White),
-                shape = RoundedCornerShape(12.dp)
+                border = BorderStroke(
+                    width = 2.dp,
+                    color = if (isDanger) Color(0xFFFCA5A5) else ButtonGlassFocusedBorder
+                ),
+                shape = RoundedCornerShape(14.dp)
             )
         ),
         colors = ButtonDefaults.colors(
-            containerColor = Color(0xFF28303E),
-            focusedContainerColor = Color(0xFF3B465A)
+            containerColor = if (isDanger) ButtonDangerBg else ButtonGlassBg,
+            focusedContainerColor = if (isDanger) ButtonDangerFocusedBg else ButtonGlassFocusedBg
         ),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 11.dp),
+        modifier = baseModifier
+            .fillMaxWidth()
+            .scale(scale)
+            .then(
+                if (isFocused) {
+                    Modifier.shadow(12.dp, RoundedCornerShape(14.dp), ambientColor = Color.Black)
+                } else {
+                    Modifier
+                }
+            )
     ) {
         Text(
             text = text,
-            fontSize = 12.5.sp,
-            fontWeight = FontWeight.Medium,
-            color = textColor
+            fontSize = 13.5.sp,
+            fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isDanger) Color(0xFFFCA5A5) else StatusTextPrimary,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

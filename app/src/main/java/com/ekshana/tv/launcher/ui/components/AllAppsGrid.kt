@@ -12,7 +12,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.ekshana.tv.launcher.data.AppInfo
 
 /**
- * 6-Column Landscape Squircle Grid matching Apple TV home grid layout.
+ * 6-Column Landscape Squircle Grid.
  *
  * Each card is sized identically to the top row (74.dp height, proportional width).
  */

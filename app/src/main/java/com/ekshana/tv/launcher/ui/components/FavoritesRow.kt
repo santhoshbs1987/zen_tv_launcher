@@ -17,7 +17,7 @@ import com.ekshana.tv.launcher.ui.theme.TopGlassContainerBg
 import com.ekshana.tv.launcher.ui.theme.TopGlassContainerBorder
 
 /**
- * Apple TV Style Top Favorites Bar.
+ * Top Favorites Bar.
  *
  * Sized 100% identically to the grid items below (74.dp height, identical width columns).
  */

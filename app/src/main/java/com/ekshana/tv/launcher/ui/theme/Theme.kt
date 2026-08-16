@@ -10,7 +10,7 @@ import androidx.tv.material3.darkColorScheme
 private val LauncherColorScheme = darkColorScheme(
     primary = StatusTextPrimary,
     secondary = StatusIconColor,
-    background = AppleTvBgTop,
+    background = ZenBgTop,
     surface = CardLightBg,
     onPrimary = CardTextLight,
     onBackground = CardTextDark,

@@ -59,7 +59,7 @@ fun HomeScreen(
 
     val gridFocusRequesters = remember { mutableStateMapOf<String, FocusRequester>() }
 
-    // Prepend Inputs card and Settings card in the first row
+    // Prepend Inputs, Settings, and Free Memory tiles in the first row
     val tvInputApp = remember {
         AppInfo(
             label = "Inputs",
@@ -76,9 +76,19 @@ fun HomeScreen(
         )
     }
 
+    val freeMemoryApp = remember {
+        AppInfo(
+            label = "Free Memory",
+            packageName = "com.ekshana.tv.launcher.ramcleaner",
+            iconBitmap = null
+        )
+    }
+
     val displayApps = remember(uiState.allApps) {
-        listOf(tvInputApp, androidSettingsApp) + uiState.allApps.filter {
-            it.packageName != tvInputApp.packageName && it.packageName != androidSettingsApp.packageName
+        listOf(tvInputApp, androidSettingsApp, freeMemoryApp) + uiState.allApps.filter {
+            it.packageName != tvInputApp.packageName &&
+            it.packageName != androidSettingsApp.packageName &&
+            it.packageName != freeMemoryApp.packageName
         }
     }
 
@@ -168,7 +178,7 @@ fun HomeScreen(
 
                 Spacer(Modifier.height(14.dp))
 
-                // Unified All Apps Grid (with Inputs and Settings in first positions)
+                // Unified All Apps Grid (with Inputs, Settings, and Free Memory in first positions)
                 AllAppsGrid(
                     apps = displayApps,
                     focusRequesters = gridFocusRequesters,
@@ -187,6 +197,9 @@ fun HomeScreen(
                                     showSettings = true
                                 }
                             }
+                            freeMemoryApp.packageName -> {
+                                viewModel.cleanRam(context)
+                            }
                             else -> {
                                 viewModel.launchApp(context, app.packageName)
                             }
@@ -196,6 +209,7 @@ fun HomeScreen(
                         when (app.packageName) {
                             tvInputApp.packageName -> showInputSwitcher = true
                             androidSettingsApp.packageName -> showSettings = true
+                            freeMemoryApp.packageName -> viewModel.cleanRam(context)
                             else -> selectedContextApp = app
                         }
                     },
