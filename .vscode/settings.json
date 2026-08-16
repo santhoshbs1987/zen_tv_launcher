@@ -4,5 +4,20 @@
   "java.jdt.ls.java.home": "/Applications/Android Studio.app/Contents/jbr/Contents/Home",
   "gradle.java.home": "/Applications/Android Studio.app/Contents/jbr/Contents/Home",
   "java.import.gradle.wrapper.enabled": true,
-  "java.import.gradle.enabled": true
+  "java.import.gradle.enabled": true,
+  "python.testing.unittestEnabled": true,
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "./tests",
+    "-p",
+    "test_*.py"
+  ],
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true
 }
+
+
