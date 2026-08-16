@@ -5,18 +5,13 @@
   "gradle.java.home": "/Applications/Android Studio.app/Contents/jbr/Contents/Home",
   "java.import.gradle.wrapper.enabled": true,
   "java.import.gradle.enabled": true,
-  "python.testing.unittestEnabled": true,
-  "python.testing.unittestArgs": [
-    "-v",
-    "-s",
-    "./tests",
-    "-p",
-    "test_*.py"
-  ],
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
   "python.testing.pytestEnabled": true,
+  "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
   "python.testing.pytestArgs": [
     "tests"
   ],
+  "python.testing.unittestEnabled": false,
   "python.testing.autoTestDiscoverOnSaveEnabled": true
 }
 
