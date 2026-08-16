@@ -1,12 +1,12 @@
-# AGENTS.md — Developer & AI Pair Programming Guide for Zen TV
+# AGENTS.md — Developer & AI Pair Programming Guide for Zen Launcher
 
-This document provides architectural standards, device constraints, and engineering guidelines for developers and AI agents working on **Zen TV**.
+This document provides architectural standards, device constraints, and engineering guidelines for developers and AI agents working on **Zen Launcher**.
 
 ---
 
 ## 🎯 Project Overview & Mission
 
-**Zen TV** is an ultra-lightweight, zero-bloat, distraction-free Android TV launcher built with **Jetpack Compose for TV (Material 3)**. It is specifically engineered to deliver instant (<50ms) cold start, 60fps fluid DPAD navigation, and a tiny memory footprint (~29–33 MB RAM) on low-spec Smart TVs and TV sticks (e.g., Xiaomi Mi LED Smart TV 4A 32" with 1 GB RAM).
+**Zen Launcher** is an ultra-lightweight, zero-bloat, distraction-free Android TV launcher built with **Jetpack Compose for TV (Material 3)**. It is specifically engineered to deliver instant (<50ms) cold start, 60fps fluid DPAD navigation, and a tiny memory footprint (~29–33 MB RAM) on low-spec Smart TVs and TV sticks (e.g., Xiaomi Mi LED Smart TV 4A 32" with 1 GB RAM).
 
 ---
 
@@ -66,6 +66,6 @@ This document provides architectural standards, device constraints, and engineer
 # Production release build (R8 minified & resource shrunk)
 ./gradlew assembleRelease
 
-# Set Zen TV as the default Android TV Home launcher via ADB
+# Set Zen Launcher as the default Android TV Home launcher via ADB
 adb shell cmd package set-home-activity com.ekshana.tv.launcher/.MainActivity
 ```

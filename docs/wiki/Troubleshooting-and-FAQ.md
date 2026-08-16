@@ -1,6 +1,6 @@
 # ❓ Troubleshooting & Frequently Asked Questions
 
-### Q: Zen TV does not open when I press the HOME button on my remote.
+### Q: Zen Launcher does not open when I press the HOME button on my remote.
 **A:** On some OEM TVs (like Xiaomi PatchWall or Sony BRAVIA), the manufacturer hardcodes the remote HOME button to launch their proprietary launcher.  
 To fix this:
 1. Connect via ADB: `adb connect <TV_IP>:5555`
@@ -10,7 +10,7 @@ To fix this:
 ---
 
 ### Q: Why do some sideloaded mobile apps not show icons or open?
-**A:** Standard Android mobile apps often lack Leanback TV launcher banners. Zen TV automatically discovers standard `android.intent.action.MAIN` + `android.intent.category.LAUNCHER` activities in addition to TV-specific leanback launchers, ensuring all sideloaded apps show up.
+**A:** Standard Android mobile apps often lack Leanback TV launcher banners. Zen Launcher automatically discovers standard `android.intent.action.MAIN` + `android.intent.category.LAUNCHER` activities in addition to TV-specific leanback launchers, ensuring all sideloaded apps show up.
 
 ---
 

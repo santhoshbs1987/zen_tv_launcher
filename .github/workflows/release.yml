@@ -1,4 +1,4 @@
-name: Build & Release Zen TV APK
+name: Build & Release Zen Launcher APK
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ZenTV-APKs
+          name: ZenLauncher-APKs
           path: app/build/outputs/apk/**/*.apk
 
       - name: Create GitHub Release

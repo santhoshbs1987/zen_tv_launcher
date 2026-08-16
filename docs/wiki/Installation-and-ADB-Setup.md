@@ -1,6 +1,6 @@
 # 🚀 Installation & ADB Setup Guide
 
-This guide details how to install Zen TV and set it as the permanent default launcher across various Android TV devices.
+This guide details how to install Zen Launcher and set it as the permanent default launcher across various Android TV devices.
 
 ---
 
@@ -15,13 +15,13 @@ adb connect <TV_IP_ADDRESS>:5555
 # Verify connection
 adb devices
 
-# Install the latest Zen TV Release APK
+# Install the latest Zen Launcher Release APK
 adb install -r app-release-unsigned.apk
 ```
 
 ---
 
-## 2. Setting Zen TV as Default Launcher
+## 2. Setting Zen Launcher as Default Launcher
 
 On Android TV 9+ (Pie and newer), you can set the default Home activity directly via ADB:
 

@@ -138,7 +138,7 @@ fun SettingsScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Zen TV Settings",
+                            text = "Zen Launcher Settings",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -165,12 +165,12 @@ fun SettingsScreen(
                 SectionLabel("DEFAULT LAUNCHER")
                 Spacer(Modifier.height(6.dp))
                 SettingsRow(
-                    title = if (isDefaultLauncher) "✓  Zen TV is your default home"
-                    else "Zen TV is NOT set as default",
+                    title = if (isDefaultLauncher) "✓  Zen Launcher is your default home"
+                    else "Zen Launcher is NOT set as default",
                     subtitle = if (isDefaultLauncher)
                         "Press Home on your remote to land here directly."
                     else
-                        "Tap \"Choose Home App\", then select Zen TV → \"Always\".",
+                        "Tap \"Choose Home App\", then select Zen Launcher → \"Always\".",
                     statusColor = if (isDefaultLauncher) Color(0xFF4ADE80) else Color(0xFFFBBF24),
                 ) {
                     if (!isDefaultLauncher) {
@@ -344,7 +344,7 @@ fun SettingsScreen(
                         .padding(horizontal = 20.dp, vertical = 14.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    AboutRow(label = "App", value = "Zen TV")
+                    AboutRow(label = "App", value = "Zen Launcher")
                     AboutRow(label = "Version", value = "1.0")
                     AboutRow(label = "Platform", value = "Mi LED Smart TV 4A (32\") · Android TV 9")
                     AboutRow(label = "Architecture", value = "Ultra-lightweight ~29 MB memory footprint")

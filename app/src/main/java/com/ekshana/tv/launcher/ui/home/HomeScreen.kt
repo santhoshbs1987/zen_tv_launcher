@@ -154,7 +154,7 @@ fun HomeScreen(
                     }
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Zen TV",
+                        text = "Zen Launcher",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary,
@@ -280,7 +280,7 @@ private fun TopBar(
             )
             Spacer(Modifier.width(10.dp))
             Text(
-                text = "Zen TV",
+                text = "Zen Launcher",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
