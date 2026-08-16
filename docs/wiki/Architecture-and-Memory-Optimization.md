@@ -1,6 +1,6 @@
 # ⚡ Architecture & Memory Optimization
 
-Zen TV achieves an idle RAM footprint of **~29–33 MB PSS**, compared to **180–350 MB** on standard stock Android TV launchers.
+Zen Launcher achieves an idle RAM footprint of **~29–33 MB PSS**, compared to **180–350 MB** on standard stock Android TV launchers.
 
 ---
 
@@ -26,7 +26,7 @@ graph TD
 
 ### 2. In-Hierarchy Modal Overlays
 - Android TV 9 (API 28) has known bugs with `androidx.compose.ui.window.Dialog` causing focus drops and click repeat glitches.
-- Zen TV replaces separate window dialogs with **in-hierarchy composable overlays** (`Box` overlays guarded by `BackHandler`), maintaining consistent focus and eliminating window creation overhead.
+- Zen Launcher replaces separate window dialogs with **in-hierarchy composable overlays** (`Box` overlays guarded by `BackHandler`), maintaining consistent focus and eliminating window creation overhead.
 
 ### 3. Zero-Polling Package Listener
-- Rather than polling installed apps in a background loop, Zen TV registers a dynamic `PackageChangeReceiver` listening to `ACTION_PACKAGE_ADDED`, `ACTION_PACKAGE_REMOVED`, and `ACTION_PACKAGE_CHANGED`.
+- Rather than polling installed apps in a background loop, Zen Launcher registers a dynamic `PackageChangeReceiver` listening to `ACTION_PACKAGE_ADDED`, `ACTION_PACKAGE_REMOVED`, and `ACTION_PACKAGE_CHANGED`.

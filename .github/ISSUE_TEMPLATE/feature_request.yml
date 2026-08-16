@@ -1,11 +1,11 @@
 name: Feature request
-description: Suggest an idea or enhancement for Zen TV
+description: Suggest an idea or enhancement for Zen Launcher
 title: "[FEATURE] <title>"
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
-      value: Thank you for suggesting a feature for Zen TV! Note that Zen TV prioritizes staying ultra-lightweight (<35MB RAM).
+      value: Thank you for suggesting a feature for Zen Launcher! Note that Zen Launcher prioritizes staying ultra-lightweight (<35MB RAM).
   - type: textarea
     id: problem
     attributes:

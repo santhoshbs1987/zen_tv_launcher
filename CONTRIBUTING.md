@@ -1,15 +1,15 @@
-# Contributing to Zen TV
+# Contributing to Zen Launcher
 
-Thank you for your interest in contributing to **Zen TV**!
+Thank you for your interest in contributing to **Zen Launcher**!
 
-Zen TV is built with a singular focus: **delivering an ultra-lightweight, zero-bloat, distraction-free Android TV launcher** that stays lightning fast on low-spec hardware (1 GB RAM TV devices like Xiaomi Mi TV 4A 32", Fire TV Stick, etc.).
+Zen Launcher is built with a singular focus: **delivering an ultra-lightweight, zero-bloat, distraction-free Android TV launcher** that stays lightning fast on low-spec hardware (1 GB RAM TV devices like Xiaomi Mi TV 4A 32", Fire TV Stick, etc.).
 
 ---
 
 ## 📐 Core Engineering Principles
 
 1. **Memory Budget First**: 
-   - Zen TV must idle at **≤ 35 MB RAM**.
+   - Zen Launcher must idle at **≤ 35 MB RAM**.
    - Do not add heavy dependencies, uncompressed image loaders, or background telemetry services.
 2. **100% D-pad Accessibility**:
    - Every interactive element must be fully navigable with standard remote buttons (`DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_CENTER`, `BACK`, `MENU`).
@@ -31,14 +31,14 @@ Zen TV is built with a singular focus: **delivering an ultra-lightweight, zero-b
 
 ```bash
 # Clone the repository
-git clone https://github.com/santhoshbs1987/zen_tv_launcher.git
-cd zen_tv_launcher
+git clone https://github.com/santhoshbs1987/zen_launcher.git
+cd zen_launcher
 
 # Build debug APK and install onto connected TV device
 ./gradlew assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 
-# Launch Zen TV via ADB
+# Launch Zen Launcher via ADB
 adb shell am start -n com.ekshana.tv.launcher/.MainActivity
 ```
 

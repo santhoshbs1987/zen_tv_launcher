@@ -1,5 +1,5 @@
 name: Bug report
-description: Create a report to help us improve Zen TV
+description: Create a report to help us improve Zen Launcher
 title: "[BUG] <title>"
 labels: ["bug"]
 body:
@@ -35,7 +35,7 @@ body:
       label: Steps to Reproduce
       description: How to trigger the issue using remote D-pad controls.
       value: |
-        1. Open Zen TV
+        1. Open Zen Launcher
         2. Navigate D-pad to ...
         3. Press ...
         4. See error

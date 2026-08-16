@@ -1,12 +1,12 @@
 # 🎮 Remote Controls & Navigation Shortcuts
 
-Zen TV is designed from the ground up for 100% remote-first interaction without requiring a mouse or touch input.
+Zen Launcher is designed from the ground up for 100% remote-first interaction without requiring a mouse or touch input.
 
 ---
 
 ## 🕹️ Key Bindings Reference
 
-| Remote Button | Action in Zen TV |
+| Remote Button | Action in Zen Launcher |
 | :--- | :--- |
 | **D-Pad Directionals** (Up / Down / Left / Right) | Navigate through Favorites, Apps Grid, and Top Bar items with smooth focus glow. |
 | **D-Pad Center / OK / ENTER** | Launch the focused application, or confirm dialog actions. |

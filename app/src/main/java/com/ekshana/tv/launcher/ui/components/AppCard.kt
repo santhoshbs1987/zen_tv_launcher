@@ -1,24 +1,33 @@
 package com.ekshana.tv.launcher.ui.components
 
 import android.view.KeyEvent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -26,32 +35,23 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
-import com.ekshana.tv.launcher.ui.theme.AccentCyan
-import com.ekshana.tv.launcher.ui.theme.CardBg
-import com.ekshana.tv.launcher.ui.theme.CardBorderIdle
-import com.ekshana.tv.launcher.ui.theme.CardFocusedBg
-import com.ekshana.tv.launcher.ui.theme.DialogSurface
-import com.ekshana.tv.launcher.ui.theme.FocusBorderColor
-import com.ekshana.tv.launcher.ui.theme.TextPrimary
-import com.ekshana.tv.launcher.ui.theme.TextSecondary
+import com.ekshana.tv.launcher.R
+import com.ekshana.tv.launcher.ui.theme.CardGlassBorder
 
 /**
- * TV App Card with standard TV Card click & long click support
- * plus Remote Menu key shortcut.
- *
- * Optimized for standard 720p / 1080p TV Viewport & Overscan:
- * - 48dp Icon size with 54dp inner pill
- * - Scaled focus growth (1.06x) to avoid clipping adjacent grid items
+ * Modern Landscape Squircle App Card.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun AppCard(
     label: String,
+    packageName: String,
     iconBitmap: ImageBitmap?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onFocused: () -> Unit = {},
     focusRequester: FocusRequester? = null,
+    cardHeight: Dp = 74.dp,
     modifier: Modifier = Modifier,
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -101,75 +101,404 @@ fun AppCard(
         false
     }
 
+    val isTvInputs = packageName == "com.ekshana.tv.launcher.inputs"
+    val isSettings = packageName == "com.ekshana.tv.launcher.settings"
+    val isRamCleaner = packageName == "com.ekshana.tv.launcher.ramcleaner"
+    val isBanner = (iconBitmap != null && iconBitmap.width > iconBitmap.height * 1.3f) || isTvInputs || isSettings || isRamCleaner
+    val style = remember(packageName, label) { getAppStyle(packageName, label) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.09f else 1.0f,
+        animationSpec = tween(durationMillis = 180),
+        label = "cardFocusScale"
+    )
+
     Card(
         onClick = onClick,
         onLongClick = onLongClick,
-        modifier = cardModifier,
+        modifier = cardModifier
+            .height(cardHeight)
+            .scale(scale)
+            .then(
+                if (isFocused) {
+                    Modifier.shadow(
+                        elevation = 22.dp,
+                        shape = RoundedCornerShape(18.dp),
+                        ambientColor = Color.Black.copy(alpha = 0.8f),
+                        spotColor = Color.Black.copy(alpha = 0.9f)
+                    )
+                } else {
+                    Modifier.shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(18.dp),
+                        ambientColor = Color.Black.copy(alpha = 0.25f),
+                        spotColor = Color.Black.copy(alpha = 0.25f)
+                    )
+                }
+            ),
         shape = CardDefaults.shape(
-            shape = RoundedCornerShape(12.dp),
-            focusedShape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(18.dp),
+            focusedShape = RoundedCornerShape(18.dp)
         ),
-        scale = CardDefaults.scale(
-            scale = 1.0f,
-            focusedScale = 1.06f
-        ),
+        scale = CardDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(1.dp, CardBorderIdle),
-                shape = RoundedCornerShape(12.dp)
+                border = BorderStroke(1.dp, if (style.borderColor != Color.Transparent) style.borderColor else CardGlassBorder),
+                shape = RoundedCornerShape(18.dp)
             ),
             focusedBorder = Border(
-                border = BorderStroke(2.dp, FocusBorderColor),
-                shape = RoundedCornerShape(12.dp)
+                border = BorderStroke(3.dp, Color.White),
+                shape = RoundedCornerShape(18.dp)
             )
         ),
         colors = CardDefaults.colors(
-            containerColor = CardBg,
-            focusedContainerColor = CardFocusedBg
+            containerColor = if (isBanner) Color.Transparent else style.bgColor,
+            focusedContainerColor = if (isBanner) Color.Transparent else style.bgColor
         ),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 10.dp),
+                .fillMaxSize()
+                .clip(RoundedCornerShape(18.dp))
+                .then(
+                    if (!isBanner) {
+                        if (style.gradient != null) {
+                            Modifier.background(style.gradient)
+                        } else {
+                            Modifier.background(style.bgColor)
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
+                .then(
+                    if (isFocused) {
+                        Modifier.border(3.dp, Color.White, RoundedCornerShape(18.dp))
+                    } else {
+                        Modifier
+                    }
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isFocused) DialogSurface else Color(0xFF101420)),
-                contentAlignment = Alignment.Center
-            ) {
-                if (iconBitmap != null) {
+            if (isTvInputs) {
+                // TV Inputs Card Presentation
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF0284C7), Color(0xFF0369A1))
+                            )
+                        )
+                        .padding(horizontal = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_tune),
+                        contentDescription = "Inputs",
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Inputs",
+                        fontSize = 14.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1
+                    )
+                }
+            } else if (isSettings) {
+                // Android Settings Card Presentation
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF334155), Color(0xFF1E293B))
+                            )
+                        )
+                        .padding(horizontal = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_settings),
+                        contentDescription = "Settings",
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Settings",
+                        fontSize = 14.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1
+                    )
+                }
+            } else if (isRamCleaner) {
+                // Free Memory / RAM Cleaner Card Presentation
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(Color(0xFF059669), Color(0xFF047857))
+                            )
+                        )
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_bolt),
+                        contentDescription = "Free Memory",
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "Free Memory",
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else if (iconBitmap != null) {
+                if (isBanner) {
+                    // Full-bleed TV horizontal banner
                     Image(
                         bitmap = iconBitmap,
                         contentDescription = label,
-                        modifier = Modifier.size(42.dp),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
                 } else {
+                    // Centered icon with clean presentation
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            bitmap = iconBitmap,
+                            contentDescription = label,
+                            modifier = Modifier.size(46.dp)
+                        )
+                    }
+                }
+            } else {
+                // Letterform / Typography fallback
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp)
+                ) {
                     Text(
                         text = if (label.isNotEmpty()) label.take(1).uppercase() else "•",
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isFocused) AccentCyan else TextPrimary
+                        color = style.textColor
                     )
+                    if (label.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = label,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = style.textColor.copy(alpha = 0.85f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(7.dp))
-
-            Text(
-                text = label,
-                fontSize = 11.5.sp,
-                fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Medium,
-                color = if (isFocused) TextPrimary else TextSecondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+            // Specular Top-Light Sheen
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(22.dp)
+                    .align(Alignment.TopCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.White.copy(alpha = if (isFocused) 0.18f else 0.08f),
+                                Color.Transparent
+                            )
+                        )
+                    )
             )
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Curated Brand / App Styling System
+// -----------------------------------------------------------------------------
+
+data class AppCardStyle(
+    val bgColor: Color,
+    val textColor: Color = Color.White,
+    val borderColor: Color = Color.Transparent,
+    val gradient: Brush? = null,
+)
+
+fun getAppStyle(packageName: String, label: String): AppCardStyle {
+    val pkg = packageName.lowercase()
+    val name = label.lowercase()
+
+    return when {
+        // Free Memory
+        pkg.contains("ramcleaner") || name.contains("memory") -> AppCardStyle(
+            bgColor = Color(0xFF059669),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF059669), Color(0xFF047857)))
+        )
+
+        // TV Inputs
+        pkg.contains("inputs") || name.contains("inputs") -> AppCardStyle(
+            bgColor = Color(0xFF0284C7),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF0284C7), Color(0xFF0369A1)))
+        )
+
+        // Android / TV Settings
+        pkg.contains("settings") || name.contains("setting") -> AppCardStyle(
+            bgColor = Color(0xFF334155),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
+        )
+
+        // Netflix
+        pkg.contains("netflix") || name.contains("netflix") -> AppCardStyle(
+            bgColor = Color(0xFFFFFFFF),
+            textColor = Color(0xFFE50914),
+            borderColor = Color(0x20000000)
+        )
+
+        // YouTube
+        pkg.contains("youtube") || name.contains("youtube") || pkg.contains("smarttube") -> AppCardStyle(
+            bgColor = Color(0xFFF4F4F6),
+            textColor = Color(0xFF282828),
+            borderColor = Color(0x20000000)
+        )
+
+        // Amazon Prime Video
+        pkg.contains("amazon") && pkg.contains("video") || name.contains("prime") -> AppCardStyle(
+            bgColor = Color(0xFF00A8E1),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF00A8E1), Color(0xFF0072A0)))
+        )
+
+        pkg.contains("appletv") -> AppCardStyle(
+            bgColor = Color(0xFF1B1D22),
+            textColor = Color.White,
+            borderColor = Color(0x33FFFFFF)
+        )
+
+        // Zee5 / YuppTV
+        pkg.contains("yupp") || name.contains("yupp") -> AppCardStyle(
+            bgColor = Color(0xFF1E222B),
+            textColor = Color.White,
+            borderColor = Color(0x33FFFFFF)
+        )
+
+        // Jellyfin
+        pkg.contains("jellyfin") || name.contains("jellyfin") -> AppCardStyle(
+            bgColor = Color(0xFF16192E),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF00A4DC), Color(0xFFAA5CC3)))
+        )
+
+        // MX Player
+        pkg.contains("mxtech") || name.contains("mx player") -> AppCardStyle(
+            bgColor = Color(0xFF0C78E4),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF1D8CFA), Color(0xFF0B63C2)))
+        )
+
+        // Disney+ / Hotstar / JioHotstar
+        pkg.contains("hotstar") || name.contains("hotstar") || name.contains("disney") -> AppCardStyle(
+            bgColor = Color(0xFF0063E5),
+            textColor = Color.White,
+            gradient = Brush.horizontalGradient(
+                listOf(
+                    Color(0xFF0C5FE8),
+                    Color(0xFF8820B4),
+                    Color(0xFFE40066)
+                )
+            )
+        )
+
+        // SonyLIV / Sony
+        pkg.contains("sonyliv") || name.contains("sonyliv") || name.contains("sony liv") -> AppCardStyle(
+            bgColor = Color(0xFF12141A),
+            textColor = Color.White,
+            borderColor = Color(0x33FFFFFF)
+        )
+
+        // Stremio
+        pkg.contains("stremio") || name.contains("stremio") -> AppCardStyle(
+            bgColor = Color(0xFF14172C),
+            textColor = Color.White,
+            borderColor = Color(0x33FFFFFF)
+        )
+
+        // BrowseHere / Browser
+        pkg.contains("browsehere") || name.contains("browsehere") || name.contains("browser") -> AppCardStyle(
+            bgColor = Color(0xFF2E63E5),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFF3B82F6), Color(0xFF1D4ED8)))
+        )
+
+        // Settings
+        pkg.contains("settings") || name.contains("setting") -> AppCardStyle(
+            bgColor = Color(0xFF475569),
+            textColor = Color.White
+        )
+
+        // Downloader
+        pkg.contains("downloader") || name.contains("downloader") -> AppCardStyle(
+            bgColor = Color(0xFFF97316),
+            textColor = Color.White,
+            gradient = Brush.linearGradient(listOf(Color(0xFFFB923C), Color(0xFFEA580C)))
+        )
+
+        // Google Play Movies / Store
+        pkg.contains("vending") || pkg.contains("play") || name.contains("play") -> AppCardStyle(
+            bgColor = Color(0xFFFFFFFF),
+            textColor = Color(0xFF1E293B),
+            borderColor = Color(0x20000000)
+        )
+
+        // TV / Live Channels
+        name == "tv" || pkg.contains("android.tv") || name.contains("channels") -> AppCardStyle(
+            bgColor = Color(0xFFFFFFFF),
+            textColor = Color(0xFF991B1B),
+            borderColor = Color(0x20000000)
+        )
+
+        // Media Player / Gallery
+        name.contains("media") || name.contains("gallery") || name.contains("photo") -> AppCardStyle(
+            bgColor = Color(0xFF283244),
+            textColor = Color.White
+        )
+
+        // Default Surface Fallback
+        else -> {
+            val hash = (pkg.hashCode() and 0x7FFFFFFF) % 5
+            when (hash) {
+                0 -> AppCardStyle(bgColor = Color(0xFF263238), textColor = Color.White)
+                1 -> AppCardStyle(bgColor = Color(0xFF1E293B), textColor = Color.White)
+                2 -> AppCardStyle(bgColor = Color(0xFF334155), textColor = Color.White)
+                3 -> AppCardStyle(bgColor = Color(0xFF3B4B59), textColor = Color.White)
+                else -> AppCardStyle(bgColor = Color(0xFF1F2937), textColor = Color.White)
+            }
         }
     }
 }

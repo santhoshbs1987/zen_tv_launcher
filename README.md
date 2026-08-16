@@ -1,23 +1,23 @@
-# 🧘 Zen TV — Minimalist, Ultra-Lightweight Android TV Launcher
+# 🧘 Zen Launcher — Minimalist, Ultra-Lightweight Android TV Launcher
 
-[![Build & Release](https://github.com/santhoshbs1987/zen_tv_launcher/actions/workflows/release.yml/badge.svg)](https://github.com/santhoshbs1987/zen_tv_launcher/actions/workflows/release.yml)
-[![CI Status](https://github.com/santhoshbs1987/zen_tv_launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/santhoshbs1987/zen_tv_launcher/actions/workflows/ci.yml)
+[![Build & Release](https://github.com/santhoshbs1987/zen_launcher/actions/workflows/release.yml/badge.svg)](https://github.com/santhoshbs1987/zen_launcher/actions/workflows/release.yml)
+[![CI Status](https://github.com/santhoshbs1987/zen_launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/santhoshbs1987/zen_launcher/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android_TV_%7C_Google_TV-green.svg)](https://developer.android.com/tv)
 [![Min SDK](https://img.shields.io/badge/Min_SDK-24_(Android_7.0+)-orange.svg)](app/build.gradle.kts)
 [![RAM Footprint](https://img.shields.io/badge/RAM_Footprint-~29MB_PSS-brightgreen.svg)](#-highlights--features)
-[![Wiki](https://img.shields.io/badge/Documentation-GitHub_Wiki-purple.svg)](https://github.com/santhoshbs1987/zen_tv_launcher/wiki)
+[![Wiki](https://img.shields.io/badge/Documentation-GitHub_Wiki-purple.svg)](https://github.com/santhoshbs1987/zen_launcher/wiki)
 
 A blazing-fast, ultra-lightweight, and distraction-free Android TV launcher built with modern Jetpack Compose for TV (Material 3). Designed specifically for resource-constrained Smart TVs and TV sticks (e.g., Xiaomi Mi LED Smart TV 4A 32", Fire TV Stick, Chromecast with Google TV, and generic Android TV boxes).
 
 ---
 
 ## 📖 Complete Documentation & Wiki
-Check out the full **[Zen TV GitHub Wiki](https://github.com/santhoshbs1987/zen_tv_launcher/wiki)** for detailed guides:
-- [🚀 Installation & ADB Setup Guide](https://github.com/santhoshbs1987/zen_tv_launcher/wiki/Installation-and-ADB-Setup)
-- [🎮 Remote Controls & Key Shortcuts](https://github.com/santhoshbs1987/zen_tv_launcher/wiki/Remote-Controls-and-Shortcuts)
-- [⚡ Architecture & Memory Optimization](https://github.com/santhoshbs1987/zen_tv_launcher/wiki/Architecture-and-Memory-Optimization)
-- [❓ Troubleshooting & FAQ](https://github.com/santhoshbs1987/zen_tv_launcher/wiki/Troubleshooting-and-FAQ)
+Check out the full **[Zen Launcher GitHub Wiki](https://github.com/santhoshbs1987/zen_launcher/wiki)** for detailed guides:
+- [🚀 Installation & ADB Setup Guide](https://github.com/santhoshbs1987/zen_launcher/wiki/Installation-and-ADB-Setup)
+- [🎮 Remote Controls & Key Shortcuts](https://github.com/santhoshbs1987/zen_launcher/wiki/Remote-Controls-and-Shortcuts)
+- [⚡ Architecture & Memory Optimization](https://github.com/santhoshbs1987/zen_launcher/wiki/Architecture-and-Memory-Optimization)
+- [❓ Troubleshooting & FAQ](https://github.com/santhoshbs1987/zen_launcher/wiki/Troubleshooting-and-FAQ)
 
 ---
 

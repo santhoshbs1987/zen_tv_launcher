@@ -15,8 +15,8 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import com.ekshana.tv.launcher.data.AppRepository
 import com.ekshana.tv.launcher.ui.home.HomeScreen
-import com.ekshana.tv.launcher.ui.theme.DarkBg
-import com.ekshana.tv.launcher.ui.theme.ZenTvTheme
+import com.ekshana.tv.launcher.ui.theme.ZenBgTop
+import com.ekshana.tv.launcher.ui.theme.ZenLauncherTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -27,11 +27,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ZenTvTheme {
+            ZenLauncherTheme {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(DarkBg),
+                        .background(ZenBgTop),
                     shape = RectangleShape,
                 ) {
                     HomeScreen(
@@ -51,13 +51,13 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Intercept 11-Button Mi TV Remote Keys:
+     * Intercept Remote Keys:
      * 1. Power (Top)
      * 2. D-pad Circle (Up, Down, Left, Right, Center/OK)
-     * 3. Home Button (Pentagon / Outline icon) -> Returns directly to Zen TV home
-     * 4. Back Button (< Arrow) -> Handled by Compose BackHandler
-     * 5. Menu Button (☰ 3 horizontal bars) -> Opens Settings when on Home, or Context Menu on focused app
-     * 6. Volume +/- Rocker
+     * 3. Home Button -> Returns directly to Zen Launcher home
+     * 4. Back Button -> Handled by Compose BackHandler
+     * 5. Menu Button -> Opens Settings when on Home, or Context Menu on focused app
+     * 6. Inputs Button -> Quick TV source switcher
      */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (event?.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {

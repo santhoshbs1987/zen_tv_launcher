@@ -1,4 +1,4 @@
-# Zen TV ProGuard Rules for Production Release
+# Zen Launcher ProGuard Rules for Production Release
 
 # Keep Compose & Android TV runtime classes
 -keep class androidx.compose.** { *; }
