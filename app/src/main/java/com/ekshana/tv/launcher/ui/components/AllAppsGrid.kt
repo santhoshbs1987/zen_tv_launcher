@@ -20,9 +20,12 @@ import com.ekshana.tv.launcher.data.AppInfo
 fun AllAppsGrid(
     apps: List<AppInfo>,
     focusRequesters: Map<String, FocusRequester> = emptyMap(),
+    reorderingPackage: String? = null,
     onAppClick: (AppInfo) -> Unit,
     onAppLongClick: (AppInfo) -> Unit,
     onAppFocused: (AppInfo) -> Unit = {},
+    onMoveApp: (packageName: String, delta: Int) -> Unit = { _, _ -> },
+    onFinishReordering: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
@@ -35,6 +38,7 @@ fun AllAppsGrid(
             .focusRestorer(),
     ) {
         items(items = apps, key = { it.packageName }) { app ->
+            val isReordering = app.packageName == reorderingPackage
             AppCard(
                 label = app.label,
                 packageName = app.packageName,
@@ -42,6 +46,9 @@ fun AllAppsGrid(
                 onClick = { onAppClick(app) },
                 onLongClick = { onAppLongClick(app) },
                 onFocused = { onAppFocused(app) },
+                isReordering = isReordering,
+                onMoveDirection = { delta -> onMoveApp(app.packageName, delta) },
+                onFinishReordering = onFinishReordering,
                 focusRequester = focusRequesters[app.packageName],
                 cardHeight = 74.dp,
                 modifier = Modifier.fillMaxWidth(),

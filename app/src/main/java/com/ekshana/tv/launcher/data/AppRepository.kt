@@ -38,6 +38,9 @@ object AppRepository {
     private val _hiddenApps = MutableStateFlow<Set<String>>(emptySet())
     val hiddenApps: StateFlow<Set<String>> = _hiddenApps.asStateFlow()
 
+    private val _customAppOrder = MutableStateFlow<List<String>>(emptyList())
+    val customAppOrder: StateFlow<List<String>> = _customAppOrder.asStateFlow()
+
     private lateinit var prefs: SharedPreferences
     private lateinit var appContext: Context
     private var initialized = false
@@ -47,8 +50,19 @@ object AppRepository {
         appContext = context.applicationContext
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         _hiddenApps.value = prefs.getStringSet(KEY_HIDDEN, emptySet()) ?: emptySet()
+        _customAppOrder.value = loadCustomOrderFromPrefs()
         initialized = true
         refresh()
+    }
+
+    private fun loadCustomOrderFromPrefs(): List<String> {
+        val raw = prefs.getString(KEY_CUSTOM_ORDER, null) ?: return emptyList()
+        return if (raw.isEmpty()) emptyList() else raw.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+    }
+
+    private fun saveCustomOrderToPrefs(order: List<String>) {
+        val raw = order.joinToString(",")
+        prefs.edit().putString(KEY_CUSTOM_ORDER, raw).apply()
     }
 
     /**
@@ -103,7 +117,7 @@ object AppRepository {
                     packageName = pkg,
                     iconBitmap = bitmap,
                 )
-            }.sortedBy { it.label.lowercase() }
+            }
 
             _rawApps.value = appList
             applyFilter()
@@ -112,7 +126,53 @@ object AppRepository {
 
     private fun applyFilter() {
         val hidden = _hiddenApps.value
-        _apps.value = _rawApps.value.filter { !hidden.contains(it.packageName) }
+        val unhiddenApps = _rawApps.value.filter { !hidden.contains(it.packageName) }
+        val order = _customAppOrder.value
+
+        if (order.isEmpty()) {
+            _apps.value = unhiddenApps.sortedBy { it.label.lowercase() }
+        } else {
+            val orderMap = order.mapIndexed { index, pkg -> pkg to index }.toMap()
+            // Apps with an established custom order rank first by their saved index;
+            // Any new apps not in orderMap are sorted alphabetically after.
+            _apps.value = unhiddenApps.sortedWith(
+                compareBy<AppInfo> { app -> orderMap[app.packageName] ?: Int.MAX_VALUE }
+                    .thenBy { it.label.lowercase() }
+            )
+        }
+    }
+
+    fun moveApp(fromIndex: Int, toIndex: Int) {
+        val currentDisplay = _apps.value.toMutableList()
+        if (fromIndex !in currentDisplay.indices || toIndex !in currentDisplay.indices || fromIndex == toIndex) {
+            return
+        }
+
+        val item = currentDisplay.removeAt(fromIndex)
+        currentDisplay.add(toIndex, item)
+
+        val newOrder = currentDisplay.map { it.packageName }
+        _customAppOrder.value = newOrder
+        saveCustomOrderToPrefs(newOrder)
+        applyFilter()
+    }
+
+    fun moveAppByPackage(packageName: String, delta: Int): Int {
+        val currentDisplay = _apps.value
+        val currentIndex = currentDisplay.indexOfFirst { it.packageName == packageName }
+        if (currentIndex == -1) return -1
+
+        val targetIndex = (currentIndex + delta).coerceIn(0, currentDisplay.size - 1)
+        if (targetIndex != currentIndex) {
+            moveApp(currentIndex, targetIndex)
+        }
+        return targetIndex
+    }
+
+    fun resetAppOrder() {
+        _customAppOrder.value = emptyList()
+        prefs.edit().remove(KEY_CUSTOM_ORDER).apply()
+        applyFilter()
     }
 
     fun toggleHideApp(packageName: String) {
@@ -137,4 +197,5 @@ object AppRepository {
 
     private const val PREFS_NAME = "zen_launcher_prefs"
     private const val KEY_HIDDEN = "hidden_apps"
+    private const val KEY_CUSTOM_ORDER = "custom_app_order"
 }

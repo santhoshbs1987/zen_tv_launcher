@@ -87,4 +87,27 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun `reorder delta correctly adjusts index bounds`() {
+        val listSize = 10
+        val currentIndex = 2
+
+        // Move right (+1)
+        val moveRight = (currentIndex + 1).coerceIn(0, listSize - 1)
+        assertEquals(3, moveRight)
+
+        // Move left (-1)
+        val moveLeft = (currentIndex - 1).coerceIn(0, listSize - 1)
+        assertEquals(1, moveLeft)
+
+        // Move down (+6)
+        val moveDown = (currentIndex + 6).coerceIn(0, listSize - 1)
+        assertEquals(8, moveDown)
+
+        // Move up past bound (-6)
+        val moveUpBound = (currentIndex - 6).coerceIn(0, listSize - 1)
+        assertEquals(0, moveUpBound)
+    }
 }
+

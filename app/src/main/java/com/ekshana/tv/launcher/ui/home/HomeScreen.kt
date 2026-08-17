@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +52,8 @@ fun HomeScreen(
 
     var selectedContextApp by remember { mutableStateOf<AppInfo?>(null) }
     var showHiddenAppsModal by remember { mutableStateOf(false) }
+    var showInputsModal by remember { mutableStateOf(false) }
+    var reorderingPackage by remember { mutableStateOf<String?>(null) }
     var focusedAppLabel by remember { mutableStateOf<String?>(null) }
 
     val gridFocusRequesters = remember { mutableStateMapOf<String, FocusRequester>() }
@@ -70,12 +73,15 @@ fun HomeScreen(
 
     LaunchedEffect(inputPressedTrigger) {
         if (inputPressedTrigger > 0L) {
-            TvInputManagerHelper.openNativeInputsMenu(context)
+            val openedNative = TvInputManagerHelper.openNativeInputsMenu(context)
+            if (!openedNative) {
+                showInputsModal = true
+            }
         }
     }
 
-    LaunchedEffect(selectedContextApp, uiState.isLoading) {
-        val isOverlayOpen = selectedContextApp != null
+    LaunchedEffect(selectedContextApp, showInputsModal, showHiddenAppsModal, reorderingPackage, uiState.isLoading) {
+        val isOverlayOpen = selectedContextApp != null || showInputsModal || showHiddenAppsModal || reorderingPackage != null
         if (!isOverlayOpen && !uiState.isLoading) {
             delay(150)
             try {
@@ -87,31 +93,33 @@ fun HomeScreen(
         }
     }
 
-    val isAnyOverlayOpen = selectedContextApp != null
-    BackHandler(enabled = !isAnyOverlayOpen) { /* no-op */ }
+    val isAnyOverlayOpen = selectedContextApp != null || showInputsModal || showHiddenAppsModal || reorderingPackage != null
+    BackHandler(enabled = isAnyOverlayOpen) {
+        when {
+            reorderingPackage != null -> reorderingPackage = null
+            showInputsModal -> showInputsModal = false
+            showHiddenAppsModal -> showHiddenAppsModal = false
+            selectedContextApp != null -> selectedContextApp = null
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundGradient),
+            .background(ZenBgTop),
     ) {
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Zen Launcher",
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = StatusTextPrimary,
-                        letterSpacing = 0.5.sp
-                    )
-                }
+                Text(
+                    text = "Zen Launcher",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = StatusTextPrimary,
+                    letterSpacing = 0.5.sp
+                )
             }
         } else {
             Column(
@@ -126,10 +134,15 @@ fun HomeScreen(
                     onClockClick = { viewModel.openDateSettings(context) },
                     onWifiClick = { viewModel.openWifiSettings(context) },
                     onSettingsClick = { viewModel.openSystemSettings(context) },
-                    onInputsClick = { TvInputManagerHelper.openNativeInputsMenu(context) }
+                    onInputsClick = {
+                        val openedNative = TvInputManagerHelper.openNativeInputsMenu(context)
+                        if (!openedNative) {
+                            showInputsModal = true
+                        }
+                    }
                 )
 
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(8.dp))
 
                 // Watch Next / OS TV Recommendations (TvContractCompat)
                 if (uiState.recommendations.isNotEmpty()) {
@@ -145,25 +158,80 @@ fun HomeScreen(
                 AllAppsGrid(
                     apps = displayApps,
                     focusRequesters = gridFocusRequesters,
+                    reorderingPackage = reorderingPackage,
                     onAppClick = { app ->
-                        viewModel.launchApp(context, app.packageName)
+                        if (reorderingPackage != null) {
+                            reorderingPackage = null
+                        } else {
+                            viewModel.launchApp(context, app.packageName)
+                        }
                     },
                     onAppLongClick = { app ->
-                        selectedContextApp = app
+                        if (reorderingPackage == null) {
+                            selectedContextApp = app
+                        }
                     },
                     onAppFocused = { app ->
                         focusedAppLabel = app.label
                         viewModel.setLastFocusedPackage(app.packageName)
+                    },
+                    onMoveApp = { pkg, delta ->
+                        viewModel.moveAppByPackage(pkg, delta)
+                    },
+                    onFinishReordering = {
+                        reorderingPackage = null
                     },
                     modifier = Modifier.weight(1f),
                 )
             }
         }
 
-        // In-Hierarchy Modal Overlay: Context Menu (Hide, App Info, Uninstall)
+        // Reorder Mode floating HUD banner
+        if (reorderingPackage != null) {
+            val appInfo = displayApps.find { it.packageName == reorderingPackage }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp)
+                    .align(Alignment.BottomCenter),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(Color(0xE6141824), RoundedCornerShape(20.dp))
+                        .border(BorderStroke(1.5.dp, Color(0xFF00E5FF)), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 24.dp, vertical = 10.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "⇄ Moving: ${appInfo?.label ?: "App"}",
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF00E5FF)
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            text = "• D-pad [← → ↑ ↓] to Move   • [OK / BACK] to Done",
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = StatusTextPrimary
+                        )
+                    }
+                }
+            }
+        }
+
+        // In-Hierarchy Modal Overlay: Context Menu (Hide, Rearrange, App Info, Uninstall)
         selectedContextApp?.let { app ->
             AppContextMenu(
                 app = app,
+                onStartReorder = {
+                    viewModel.setLastFocusedPackage(app.packageName)
+                    reorderingPackage = app.packageName
+                },
                 onToggleHide = { viewModel.toggleHideApp(app.packageName) },
                 onAppInfo = { viewModel.openAppInfo(context, app.packageName) },
                 onUninstall = { viewModel.uninstallApp(context, app.packageName) },
@@ -178,6 +246,17 @@ fun HomeScreen(
                 onUnhideApp = { app -> viewModel.toggleHideApp(app.packageName) },
                 onUnhideAll = { viewModel.unhideAllApps() },
                 onDismiss = { showHiddenAppsModal = false }
+            )
+        }
+
+        // In-Hierarchy Modal Overlay: TV Inputs Switcher (HDMI 1 ARC, HDMI 2, HDMI 3, AV, Antenna)
+        if (showInputsModal) {
+            com.ekshana.tv.launcher.ui.components.TvInputsModal(
+                inputs = TvInputManagerHelper.inputs,
+                onSelectInput = { input ->
+                    TvInputManagerHelper.switchInput(context, input)
+                },
+                onDismiss = { showInputsModal = false }
             )
         }
     }
