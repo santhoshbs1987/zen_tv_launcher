@@ -23,19 +23,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.tv.material3.Border
 import androidx.tv.material3.Card
-import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
-import com.ekshana.tv.launcher.R
 import com.ekshana.tv.launcher.ui.theme.CardGlassBorder
 
 /**
@@ -92,10 +88,7 @@ fun AppCard(
         false
     }
 
-    val isTvInputs = packageName == "com.ekshana.tv.launcher.inputs"
-    val isSettings = packageName == "com.ekshana.tv.launcher.settings"
-    val isRamCleaner = packageName == "com.ekshana.tv.launcher.ramcleaner"
-    val isBanner = (iconBitmap != null && iconBitmap.width > iconBitmap.height * 1.3f) || isTvInputs || isSettings || isRamCleaner
+    val isBanner = iconBitmap != null && iconBitmap.width > iconBitmap.height * 1.3f
     val style = remember(packageName, label) { getAppStyle(packageName, label) }
 
     val scale by animateFloatAsState(
@@ -119,47 +112,37 @@ fun AppCard(
                         spotColor = Color.Black.copy(alpha = 0.9f)
                     )
                 } else {
-                    Modifier.shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(18.dp),
-                        ambientColor = Color.Black.copy(alpha = 0.25f),
-                        spotColor = Color.Black.copy(alpha = 0.25f)
-                    )
+                    Modifier
                 }
             ),
-        shape = CardDefaults.shape(
-            shape = RoundedCornerShape(18.dp),
-            focusedShape = RoundedCornerShape(18.dp)
-        ),
-        scale = CardDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
-        border = CardDefaults.border(
-            border = Border(
-                border = BorderStroke(1.dp, if (style.borderColor != Color.Transparent) style.borderColor else CardGlassBorder),
+        shape = androidx.tv.material3.CardDefaults.shape(RoundedCornerShape(18.dp)),
+        border = androidx.tv.material3.CardDefaults.border(
+            border = androidx.tv.material3.Border(
+                border = BorderStroke(
+                    1.dp,
+                    if (isFocused) Color.White else style.borderColor.takeIf { it != Color.Transparent } ?: CardGlassBorder
+                ),
                 shape = RoundedCornerShape(18.dp)
             ),
-            focusedBorder = Border(
+            focusedBorder = androidx.tv.material3.Border(
                 border = BorderStroke(3.dp, Color.White),
                 shape = RoundedCornerShape(18.dp)
             )
         ),
-        colors = CardDefaults.colors(
-            containerColor = if (isBanner) Color.Transparent else style.bgColor,
-            focusedContainerColor = if (isBanner) Color.Transparent else style.bgColor
-        ),
+        colors = androidx.tv.material3.CardDefaults.colors(
+            containerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent
+        )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(18.dp))
                 .then(
-                    if (!isBanner) {
-                        if (style.gradient != null) {
-                            Modifier.background(style.gradient)
-                        } else {
-                            Modifier.background(style.bgColor)
-                        }
+                    if (style.gradient != null) {
+                        Modifier.background(style.gradient)
                     } else {
-                        Modifier
+                        Modifier.background(style.bgColor)
                     }
                 )
                 .then(
@@ -171,94 +154,8 @@ fun AppCard(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (isTvInputs) {
-                // TV Inputs Card Presentation
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.linearGradient(
-                                listOf(Color(0xFF0284C7), Color(0xFF0369A1))
-                            )
-                        )
-                        .padding(horizontal = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_tune),
-                        contentDescription = "Inputs",
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Inputs",
-                        fontSize = 14.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 1
-                    )
-                }
-            } else if (isSettings) {
-                // Android Settings Card Presentation
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.linearGradient(
-                                listOf(Color(0xFF334155), Color(0xFF1E293B))
-                            )
-                        )
-                        .padding(horizontal = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_settings),
-                        contentDescription = "Settings",
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Settings",
-                        fontSize = 14.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 1
-                    )
-                }
-            } else if (isRamCleaner) {
-                // Free Memory / RAM Cleaner Card Presentation
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.linearGradient(
-                                listOf(Color(0xFF059669), Color(0xFF047857))
-                            )
-                        )
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_bolt),
-                        contentDescription = "Free Memory",
-                        modifier = Modifier.size(26.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = "Free Memory",
-                        fontSize = 13.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            } else if (iconBitmap != null) {
+            if (iconBitmap != null) {
                 if (isBanner) {
-                    // Full-bleed TV horizontal banner
                     Image(
                         bitmap = iconBitmap,
                         contentDescription = label,
@@ -266,7 +163,6 @@ fun AppCard(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    // Centered icon with clean presentation
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -282,7 +178,6 @@ fun AppCard(
                     }
                 }
             } else {
-                // Letterform / Typography fallback
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -344,27 +239,6 @@ fun getAppStyle(packageName: String, label: String): AppCardStyle {
     val name = label.lowercase()
 
     return when {
-        // Free Memory
-        pkg.contains("ramcleaner") || name.contains("memory") -> AppCardStyle(
-            bgColor = Color(0xFF059669),
-            textColor = Color.White,
-            gradient = Brush.linearGradient(listOf(Color(0xFF059669), Color(0xFF047857)))
-        )
-
-        // TV Inputs
-        pkg.contains("inputs") || name.contains("inputs") -> AppCardStyle(
-            bgColor = Color(0xFF0284C7),
-            textColor = Color.White,
-            gradient = Brush.linearGradient(listOf(Color(0xFF0284C7), Color(0xFF0369A1)))
-        )
-
-        // Android / TV Settings
-        pkg.contains("settings") || name.contains("setting") -> AppCardStyle(
-            bgColor = Color(0xFF334155),
-            textColor = Color.White,
-            gradient = Brush.linearGradient(listOf(Color(0xFF334155), Color(0xFF1E293B)))
-        )
-
         // Netflix
         pkg.contains("netflix") || name.contains("netflix") -> AppCardStyle(
             bgColor = Color(0xFFFFFFFF),

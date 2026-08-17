@@ -38,7 +38,6 @@ class HomeViewModelTest {
         val uiState = HomeUiState()
         assertTrue(uiState.allApps.isEmpty())
         assertTrue(uiState.rawApps.isEmpty())
-        assertTrue(uiState.favorites.isEmpty())
         assertTrue(uiState.recommendations.isEmpty())
         assertTrue(uiState.hiddenApps.isEmpty())
         assertTrue(uiState.isLoading)
@@ -60,17 +59,14 @@ class HomeViewModelTest {
         val uiState = HomeUiState(
             allApps = listOf(app1, app2),
             rawApps = listOf(app1, app2),
-            favorites = listOf(app1),
             recommendations = listOf(rec1),
             hiddenApps = setOf("com.hidden.app"),
             isLoading = false
         )
 
         assertEquals(2, uiState.allApps.size)
-        assertEquals(1, uiState.favorites.size)
         assertEquals(1, uiState.recommendations.size)
         assertEquals("Stranger Things", uiState.recommendations.first().title)
-        assertEquals("YouTube", uiState.favorites.first().label)
         assertTrue(uiState.hiddenApps.contains("com.hidden.app"))
         assertFalse(uiState.isLoading)
     }

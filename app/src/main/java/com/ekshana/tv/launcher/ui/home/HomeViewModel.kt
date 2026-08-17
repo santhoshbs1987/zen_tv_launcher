@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 data class HomeUiState(
     val allApps: List<AppInfo> = emptyList(),
     val rawApps: List<AppInfo> = emptyList(),
-    val favorites: List<AppInfo> = emptyList(),
     val recommendations: List<TvRecommendation> = emptyList(),
     val hiddenApps: Set<String> = emptySet(),
     val isLoading: Boolean = true,
@@ -41,15 +40,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<HomeUiState> = combine(
         AppRepository.apps,
         AppRepository.rawApps,
-        AppRepository.favorites,
         AppRepository.hiddenApps,
         recommendationsRepo.getWatchNextPrograms(),
-    ) { apps, rawApps, favPkgs, hidden, recs ->
-        val favApps = favPkgs.mapNotNull { pkg -> rawApps.find { it.packageName == pkg } }
+    ) { apps, rawApps, hidden, recs ->
         HomeUiState(
             allApps = apps,
             rawApps = rawApps,
-            favorites = favApps,
             recommendations = recs,
             hiddenApps = hidden,
             isLoading = apps.isEmpty() && rawApps.isEmpty(),
@@ -67,11 +63,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun setLastFocusedPackage(packageName: String) {
         _lastFocusedPackage.value = packageName
     }
-
-    fun toggleFavorite(packageName: String) = AppRepository.toggleFavorite(packageName)
-    fun moveFavorite(packageName: String, direction: Int) = AppRepository.moveFavorite(packageName, direction)
-    fun clearFavorites() = AppRepository.clearFavorites()
-    fun isFavorite(packageName: String): Boolean = AppRepository.isFavorite(packageName)
 
     fun toggleHideApp(packageName: String) = AppRepository.toggleHideApp(packageName)
     fun unhideAllApps() = AppRepository.unhideAllApps()
