@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.tv.foundation)
     implementation(libs.androidx.tv.material)
+    implementation(libs.androidx.tvprovider)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.ext.junit)

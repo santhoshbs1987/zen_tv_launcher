@@ -1,18 +1,17 @@
 package com.ekshana.tv.launcher.ui.home
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -33,8 +32,7 @@ import com.ekshana.tv.launcher.data.AppInfo
 import com.ekshana.tv.launcher.data.TvInputManagerHelper
 import com.ekshana.tv.launcher.ui.components.AllAppsGrid
 import com.ekshana.tv.launcher.ui.components.AppContextMenu
-import com.ekshana.tv.launcher.ui.components.TvInputSwitcherDialog
-import com.ekshana.tv.launcher.ui.settings.SettingsScreen
+import com.ekshana.tv.launcher.ui.components.RecommendationsRow
 import com.ekshana.tv.launcher.ui.theme.*
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -54,43 +52,10 @@ fun HomeScreen(
 
     var selectedContextApp by remember { mutableStateOf<AppInfo?>(null) }
     var focusedAppLabel by remember { mutableStateOf<String?>(null) }
-    var showSettings by remember { mutableStateOf(false) }
-    var showInputSwitcher by remember { mutableStateOf(false) }
 
     val gridFocusRequesters = remember { mutableStateMapOf<String, FocusRequester>() }
 
-    // Prepend Inputs, Settings, and Free Memory tiles in the first row
-    val tvInputApp = remember {
-        AppInfo(
-            label = "Inputs",
-            packageName = "com.ekshana.tv.launcher.inputs",
-            iconBitmap = null
-        )
-    }
-
-    val androidSettingsApp = remember {
-        AppInfo(
-            label = "Settings",
-            packageName = "com.ekshana.tv.launcher.settings",
-            iconBitmap = null
-        )
-    }
-
-    val freeMemoryApp = remember {
-        AppInfo(
-            label = "Free Memory",
-            packageName = "com.ekshana.tv.launcher.ramcleaner",
-            iconBitmap = null
-        )
-    }
-
-    val displayApps = remember(uiState.allApps) {
-        listOf(tvInputApp, androidSettingsApp, freeMemoryApp) + uiState.allApps.filter {
-            it.packageName != tvInputApp.packageName &&
-            it.packageName != androidSettingsApp.packageName &&
-            it.packageName != freeMemoryApp.packageName
-        }
-    }
+    val displayApps = uiState.allApps
 
     LaunchedEffect(displayApps) {
         displayApps.forEach { app ->
@@ -102,23 +67,22 @@ fun HomeScreen(
 
     LaunchedEffect(menuPressedTrigger) {
         if (menuPressedTrigger > 0L) {
-            showSettings = !showSettings
+            viewModel.openSystemSettings(context)
         }
     }
 
     LaunchedEffect(inputPressedTrigger) {
         if (inputPressedTrigger > 0L) {
-            showInputSwitcher = !showInputSwitcher
+            TvInputManagerHelper.openNativeInputsMenu(context)
         }
     }
 
-    LaunchedEffect(showSettings, selectedContextApp, showInputSwitcher, uiState.isLoading) {
-        val isOverlayOpen = showSettings || selectedContextApp != null || showInputSwitcher
+    LaunchedEffect(selectedContextApp, uiState.isLoading) {
+        val isOverlayOpen = selectedContextApp != null
         if (!isOverlayOpen && !uiState.isLoading) {
             delay(150)
             try {
-                val targetPkg = lastFocusedPackage
-                    ?: displayApps.firstOrNull()?.packageName
+                val targetPkg = lastFocusedPackage ?: displayApps.firstOrNull()?.packageName
                 if (targetPkg != null) {
                     gridFocusRequesters[targetPkg]?.requestFocus()
                 }
@@ -126,24 +90,8 @@ fun HomeScreen(
         }
     }
 
-    val isAnyOverlayOpen = showSettings || selectedContextApp != null || showInputSwitcher
+    val isAnyOverlayOpen = selectedContextApp != null
     BackHandler(enabled = !isAnyOverlayOpen) { /* no-op */ }
-
-    if (showSettings) {
-        SettingsScreen(
-            rawApps = uiState.rawApps,
-            hiddenApps = uiState.hiddenApps,
-            onToggleHide = { pkg -> viewModel.toggleHideApp(pkg) },
-            onUnhideAll = { viewModel.unhideAllApps() },
-            onClearFavorites = { viewModel.clearFavorites() },
-            onCleanRam = { viewModel.cleanRam(context) },
-            onShowInputSwitcher = { showInputSwitcher = true },
-            onBack = {
-                showSettings = false
-            },
-        )
-        return
-    }
 
     Box(
         modifier = Modifier
@@ -169,49 +117,40 @@ fun HomeScreen(
                 }
             }
         } else {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Top Status Bar (24-hour clock, Wi-Fi, Settings, Inputs)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .focusRestorer()
+            ) {
+                // Top Status Bar (Interactive 24-hour clock, Wi-Fi, System Settings, Inputs)
                 TopStatusBar(
-                    onInputsClick = { showInputSwitcher = true },
-                    onSettingsClick = { showSettings = true }
+                    onClockClick = { viewModel.openDateSettings(context) },
+                    onWifiClick = { viewModel.openWifiSettings(context) },
+                    onSettingsClick = { viewModel.openSystemSettings(context) },
+                    onInputsClick = { TvInputManagerHelper.openNativeInputsMenu(context) }
                 )
 
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(10.dp))
 
-                // Unified All Apps Grid (with Inputs, Settings, and Free Memory in first positions)
+                // Watch Next / OS TV Recommendations (TvContractCompat)
+                if (uiState.recommendations.isNotEmpty()) {
+                    RecommendationsRow(
+                        recommendations = uiState.recommendations,
+                        onRecommendationClick = { rec ->
+                            viewModel.launchRecommendation(context, rec)
+                        }
+                    )
+                }
+
+                // All Installed TV Apps Grid
                 AllAppsGrid(
                     apps = displayApps,
                     focusRequesters = gridFocusRequesters,
                     onAppClick = { app ->
-                        when (app.packageName) {
-                            tvInputApp.packageName -> {
-                                showInputSwitcher = true
-                            }
-                            androidSettingsApp.packageName -> {
-                                try {
-                                    val intent = Intent(Settings.ACTION_SETTINGS).apply {
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    }
-                                    context.startActivity(intent)
-                                } catch (_: ActivityNotFoundException) {
-                                    showSettings = true
-                                }
-                            }
-                            freeMemoryApp.packageName -> {
-                                viewModel.cleanRam(context)
-                            }
-                            else -> {
-                                viewModel.launchApp(context, app.packageName)
-                            }
-                        }
+                        viewModel.launchApp(context, app.packageName)
                     },
                     onAppLongClick = { app ->
-                        when (app.packageName) {
-                            tvInputApp.packageName -> showInputSwitcher = true
-                            androidSettingsApp.packageName -> showSettings = true
-                            freeMemoryApp.packageName -> viewModel.cleanRam(context)
-                            else -> selectedContextApp = app
-                        }
+                        selectedContextApp = app
                     },
                     onAppFocused = { app ->
                         focusedAppLabel = app.label
@@ -222,87 +161,63 @@ fun HomeScreen(
             }
         }
 
-        // In-Hierarchy Modal Overlay: Context Menu
+        // In-Hierarchy Modal Overlay: Context Menu (Hide, App Info, Uninstall)
         selectedContextApp?.let { app ->
             AppContextMenu(
                 app = app,
-                isFavorite = viewModel.isFavorite(app.packageName),
-                onToggleFavorite = { viewModel.toggleFavorite(app.packageName) },
-                onMoveFavoriteLeft = { viewModel.moveFavorite(app.packageName, -1) },
-                onMoveFavoriteRight = { viewModel.moveFavorite(app.packageName, 1) },
                 onToggleHide = { viewModel.toggleHideApp(app.packageName) },
                 onAppInfo = { viewModel.openAppInfo(context, app.packageName) },
                 onUninstall = { viewModel.uninstallApp(context, app.packageName) },
                 onDismiss = { selectedContextApp = null },
             )
         }
-
-        // In-Hierarchy Modal Overlay: TV Inputs Switcher
-        if (showInputSwitcher) {
-            TvInputSwitcherDialog(
-                onSelectInput = { inputItem ->
-                    TvInputManagerHelper.switchInput(context, inputItem)
-                },
-                onDismiss = { showInputSwitcher = false }
-            )
-        }
     }
 }
 
 // -----------------------------------------------------------------------------
-// Top Status Bar with crisp vector icons (Wi-Fi, Gear, Sliders)
+// Top Status Bar with Native OS Panel triggers
 // -----------------------------------------------------------------------------
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun TopStatusBar(
-    onInputsClick: () -> Unit,
+    onClockClick: () -> Unit,
+    onWifiClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onInputsClick: () -> Unit,
 ) {
-    var timeStr by remember { mutableStateOf(formatted24hTime()) }
+    val context = LocalContext.current
+    var timeStr by remember { mutableStateOf(getSystemFormattedTime(context)) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(context) {
         while (true) {
             delay(15_000L)
-            timeStr = formatted24hTime()
+            timeStr = getSystemFormattedTime(context)
         }
     }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 44.dp, end = 44.dp, top = 22.dp, bottom = 4.dp),
+            .padding(start = 44.dp, end = 44.dp, top = 20.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 24h Clock (e.g. 22:57)
-        Text(
+        // Interactive System Clock (Opens native OS Date & Time panel)
+        StatusTextButton(
             text = timeStr,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Medium,
-            color = StatusTextPrimary,
-            letterSpacing = 0.5.sp,
-        )
-
-        Spacer(Modifier.width(18.dp))
-
-        // Wi-Fi Icon
-        Image(
-            painter = painterResource(R.drawable.ic_wifi),
-            contentDescription = "Wi-Fi",
-            colorFilter = ColorFilter.tint(StatusIconColor),
-            modifier = Modifier.size(19.dp)
+            onClick = onClockClick
         )
 
         Spacer(Modifier.width(14.dp))
 
-        // Settings Icon Button
+        // Wi-Fi Icon Button (Opens native OS Network / Wi-Fi panel)
         StatusIconButton(
-            onClick = onSettingsClick,
+            onClick = onWifiClick,
             content = { isFocused ->
                 Image(
-                    painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = "Settings",
+                    painter = painterResource(R.drawable.ic_wifi),
+                    contentDescription = "Wi-Fi Settings",
                     colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
                     modifier = Modifier.size(19.dp)
                 )
@@ -311,17 +226,64 @@ private fun TopStatusBar(
 
         Spacer(Modifier.width(10.dp))
 
-        // TV Inputs / Slider Controls Icon Button
+        // Settings Icon Button (Opens native OS System Settings panel)
+        StatusIconButton(
+            onClick = onSettingsClick,
+            content = { isFocused ->
+                Image(
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = "System Settings",
+                    colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+        )
+
+        Spacer(Modifier.width(10.dp))
+
+        // TV Inputs Side Menu Button (Opens native Android TV Inputs side panel)
         StatusIconButton(
             onClick = onInputsClick,
             content = { isFocused ->
                 Image(
                     painter = painterResource(R.drawable.ic_tune),
-                    contentDescription = "Inputs",
+                    contentDescription = "TV Inputs",
                     colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
                     modifier = Modifier.size(19.dp)
                 )
             }
+        )
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun StatusTextButton(
+    text: String,
+    onClick: () -> Unit,
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = onClick,
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
+        border = ButtonDefaults.border(
+            border = Border(border = BorderStroke(0.dp, Color.Transparent), shape = RoundedCornerShape(12.dp)),
+            focusedBorder = Border(border = BorderStroke(2.dp, Color.White), shape = RoundedCornerShape(12.dp))
+        ),
+        colors = ButtonDefaults.colors(
+            containerColor = Color.Transparent,
+            focusedContainerColor = Color(0x35FFFFFF)
+        ),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+        modifier = Modifier.onFocusChanged { isFocused = it.isFocused }
+    ) {
+        Text(
+            text = text,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isFocused) Color.White else StatusTextPrimary,
+            letterSpacing = 0.5.sp,
         )
     }
 }
@@ -362,5 +324,6 @@ private fun StatusIconButton(
     }
 }
 
-private fun formatted24hTime(): String =
-    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+private fun getSystemFormattedTime(context: android.content.Context): String =
+    android.text.format.DateFormat.getTimeFormat(context).format(Date())
+

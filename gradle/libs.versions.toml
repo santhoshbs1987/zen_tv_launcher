@@ -13,6 +13,7 @@ extJunit = "1.2.1"
 coroutinesTest = "1.8.0"
 turbine = "1.1.0"
 robolectric = "4.12.2"
+tvprovider = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +36,7 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-tvprovider = { group = "androidx.tvprovider", name = "tvprovider", version.ref = "tvprovider" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

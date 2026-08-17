@@ -39,10 +39,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun AppContextMenu(
     app: AppInfo,
-    isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
-    onMoveFavoriteLeft: () -> Unit,
-    onMoveFavoriteRight: () -> Unit,
     onToggleHide: () -> Unit,
     onAppInfo: () -> Unit,
     onUninstall: () -> Unit,

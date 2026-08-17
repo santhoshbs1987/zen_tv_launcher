@@ -6,7 +6,7 @@
     android:viewportWidth="320"
     android:viewportHeight="180">
 
-    <!-- Leanback TV Banner Background with deep subtle gradient -->
+    <!-- Solid Deep Space TV Banner Background -->
     <path
         android:pathData="M0,0h320v180h-320z">
         <aapt:attr name="android:fillColor">
@@ -16,120 +16,152 @@
                 android:endX="320"
                 android:endY="180"
                 android:type="linear">
-                <item android:offset="0.0" android:color="#07090E" />
-                <item android:offset="0.5" android:color="#0E131F" />
-                <item android:offset="1.0" android:color="#161C2C" />
+                <item android:offset="0.0" android:color="#070A10" />
+                <item android:offset="0.6" android:color="#0D1424" />
+                <item android:offset="1.0" android:color="#141E34" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- Subtle Ambient Glow -->
+    <!-- Outer Card Subtle Border -->
     <path
-        android:fillColor="#0D00F0FF"
-        android:pathData="M 80,90 A 50,50 0 1 1 79.9,90" />
+        android:strokeWidth="2"
+        android:strokeColor="#2500F0FF"
+        android:pathData="M 8,8 L 312,8 C 316,8 318,10 318,14 L 318,166 C 318,170 316,172 312,172 L 8,172 C 4,172 2,170 2,166 L 2,14 C 2,10 4,8 8,8 Z" />
 
-    <!-- Left Icon: Zen Ensō Ring -->
+    <!-- Left Emblem: Bold Rounded Hexagon Disc -->
     <path
-        android:strokeWidth="4"
+        android:pathData="M 75,34 L 110,54 L 110,96 L 75,116 L 40,96 L 40,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="40"
+                android:startY="34"
+                android:endX="110"
+                android:endY="116"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#1E293B" />
+                <item android:offset="1.0" android:color="#0F172A" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Emblem Glowing Neon Border -->
+    <path
+        android:strokeWidth="3.5"
         android:strokeLineCap="round"
-        android:pathData="M 80,48 A 36,36 0 1 1 54,60">
+        android:strokeLineJoin="round"
+        android:pathData="M 75,34 L 110,54 L 110,96 L 75,116 L 40,96 L 40,54 Z">
         <aapt:attr name="android:strokeColor">
             <gradient
-                android:startX="44"
-                android:startY="48"
-                android:endX="116"
-                android:endY="120"
+                android:startX="40"
+                android:startY="34"
+                android:endX="110"
+                android:endY="116"
                 android:type="linear">
                 <item android:offset="0.0" android:color="#00F0FF" />
-                <item android:offset="0.5" android:color="#38BDF8" />
+                <item android:offset="0.6" android:color="#38BDF8" />
                 <item android:offset="1.0" android:color="#818CF8" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- TV Screen Frame inside Banner -->
+    <!-- Bold Solid "Z" Monogram inside Banner Emblem -->
     <path
-        android:strokeWidth="2.5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M 64,74 L 96,74 C 98.2,74 100,75.8 100,78 L 100,98 C 100,100.2 98.2,102 96,102 L 64,102 C 61.8,102 60,100.2 60,98 L 60,78 C 60,75.8 61.8,74 64,74 Z">
-        <aapt:attr name="android:strokeColor">
+        android:pathData="M 58,54 L 92,54 L 68,90 L 92,90 L 90,96 L 56,96 L 80,60 L 58,60 Z">
+        <aapt:attr name="android:fillColor">
             <gradient
-                android:startX="60"
-                android:startY="74"
-                android:endX="100"
-                android:endY="102"
+                android:startX="56"
+                android:startY="54"
+                android:endX="92"
+                android:endY="96"
                 android:type="linear">
                 <item android:offset="0.0" android:color="#FFFFFF" />
-                <item android:offset="1.0" android:color="#00F0FF" />
+                <item android:offset="1.0" android:color="#38BDF8" />
             </gradient>
         </aapt:attr>
     </path>
 
-    <!-- TV Antennas -->
-    <path
-        android:strokeWidth="2"
-        android:strokeLineCap="round"
-        android:strokeColor="#00F0FF"
-        android:pathData="M 72,66 L 79,74 M 88,66 L 81,74" />
-
-    <!-- Play Icon Center -->
+    <!-- Neon Cyan Launch Chevron inside Z -->
     <path
         android:fillColor="#00F0FF"
-        android:pathData="M 76,82 L 86,88 L 76,94 Z" />
+        android:pathData="M 75,64 L 84,79 L 78,79 L 75,73 L 72,79 L 66,79 Z" />
 
-    <!-- TV Stand Base -->
+    <!-- ============================================== -->
+    <!-- BOLD SOLID "ZEN" WORDMARK                      -->
+    <!-- ============================================== -->
+    <!-- Z (Solid Bold Block) -->
     <path
-        android:strokeWidth="2"
-        android:strokeLineCap="round"
-        android:strokeColor="#38BDF8"
-        android:pathData="M 74,102 L 71,108 M 86,102 L 89,108 M 68,108 L 92,108" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M 134,50 L 166,50 L 166,58 L 146,84 L 166,84 L 166,94 L 134,94 L 134,86 L 154,60 L 134,60 Z" />
 
-    <!-- "ZEN" Title Letterforms (Vector Path) -->
-    <!-- Z -->
+    <!-- E (Solid Bold Block) -->
     <path
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FFFFFF"
-        android:pathData="M 135,76 L 157,76 L 135,104 L 157,104" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M 174,50 L 204,50 L 204,60 L 186,60 L 186,67 L 201,67 L 201,76 L 186,76 L 186,84 L 204,84 L 204,94 L 174,94 Z" />
 
-    <!-- E -->
+    <!-- N (Solid Bold Block) -->
     <path
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FFFFFF"
-        android:pathData="M 191,76 L 169,76 L 169,104 L 191,104 M 169,90 L 187,90" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M 212,50 L 224,50 L 238,76 L 238,50 L 248,50 L 248,94 L 236,94 L 222,68 L 222,94 L 212,94 Z" />
+
+    <!-- ============================================== -->
+    <!-- BOLD SOLID "LAUNCHER" SUBTITLE BADGE           -->
+    <!-- ============================================== -->
+    <!-- Pill Badge Container for LAUNCHER -->
+    <path
+        android:pathData="M 134,106 L 285,106 C 290,106 293,109 293,114 L 293,124 C 293,129 290,132 285,132 L 134,132 C 129,132 126,129 126,124 L 126,114 C 126,109 129,106 134,106 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="126"
+                android:startY="106"
+                android:endX="293"
+                android:endY="132"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#00F0FF" />
+                <item android:offset="1.0" android:color="#0284C7" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- LAUNCHER Text Letterforms (Dark Navy for Crisp High Contrast on Cyan Pill) -->
+    <!-- L -->
+    <path
+        android:fillColor="#090D16"
+        android:pathData="M 138,112 L 142,112 L 142,123 L 148,123 L 148,126 L 138,126 Z" />
+
+    <!-- A -->
+    <path
+        android:fillColor="#090D16"
+        android:pathData="M 154,112 L 159,112 L 163,126 L 159.5,126 L 158.3,122 L 154.7,122 L 153.5,126 L 150,126 Z M 155.5,119 L 157.5,119 L 156.5,115 Z" />
+
+    <!-- U -->
+    <path
+        android:fillColor="#090D16"
+        android:pathData="M 166,112 L 170,112 L 170,121 C 170,123 171,123.5 172.5,123.5 C 174,123.5 175,123 175,121 L 175,112 L 179,112 L 179,121 C 179,125 176.5,126.5 172.5,126.5 C 168.5,126.5 166,125 166,121 Z" />
 
     <!-- N -->
     <path
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FFFFFF"
-        android:pathData="M 203,104 L 203,76 L 225,104 L 225,76" />
+        android:fillColor="#090D16"
+        android:pathData="M 183,112 L 187,112 L 192,120 L 192,112 L 195.5,112 L 195.5,126 L 191.5,126 L 186.5,118 L 186.5,126 L 183,126 Z" />
 
-    <!-- "TV" Accent Highlight -->
-    <!-- T -->
+    <!-- C -->
     <path
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeColor="#00F0FF"
-        android:pathData="M 239,78 L 257,78 M 248,78 L 248,104" />
+        android:fillColor="#090D16"
+        android:pathData="M 206,114.5 C 204.5,113 202.5,112 200,112 C 196,112 193.5,115 193.5,119 C 193.5,123 196,126 200,126 C 202.5,126 204.5,125 206,123.5 L 204,121 C 203,122 201.5,123 200,123 C 198,123 196.5,121.5 196.5,119 C 196.5,116.5 198,115 200,115 C 201.5,115 203,116 204,117 Z" />
 
-    <!-- V -->
+    <!-- H -->
     <path
-        android:strokeWidth="4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeColor="#00F0FF"
-        android:pathData="M 262,78 L 271,104 L 280,78" />
+        android:fillColor="#090D16"
+        android:pathData="M 209,112 L 213,112 L 213,117 L 218,117 L 218,112 L 222,112 L 222,126 L 218,126 L 218,120.5 L 213,120.5 L 213,126 L 209,126 Z" />
 
-    <!-- Subtitle: ULTRA LIGHT LAUNCHER -->
+    <!-- E -->
     <path
-        android:strokeWidth="1.5"
-        android:strokeColor="#64748B"
-        android:pathData="M 135,116 L 280,116" />
+        android:fillColor="#090D16"
+        android:pathData="M 226,112 L 235,112 L 235,115 L 229.5,115 L 229.5,117.5 L 234,117.5 L 234,120.5 L 229.5,120.5 L 229.5,123 L 235,123 L 235,126 L 226,126 Z" />
+
+    <!-- R -->
+    <path
+        android:fillColor="#090D16"
+        android:pathData="M 239,112 L 246,112 C 248.5,112 250,113.5 250,116 C 250,118 248.5,119 246.5,119.5 L 250.5,126 L 246.5,126 L 243,120 L 242.5,120 L 242.5,126 L 239,126 Z M 242.5,115 L 242.5,117.5 L 245.5,117.5 C 246.5,117.5 247,117 247,116 C 247,115 246.5,115 245.5,115 Z" />
 
 </vector>

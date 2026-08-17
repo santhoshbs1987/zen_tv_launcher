@@ -1,5 +1,6 @@
 package com.ekshana.tv.launcher.data
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.tv.TvContract
@@ -15,14 +16,46 @@ data class TvInputItem(
 )
 
 /**
- * Exact hardware port mapping matching the physical TV panel:
- *  - HDMI 1 (ARC)
- *  - HDMI 2
- *  - HDMI 3
- *  - AV (Video / L / R RCA jacks)
- *  - Antenna / TV Tuner (RF coax)
+ * Android TV Native Input Manager.
+ *
+ * Launches the native Android TV / Google TV Inputs Side Panel overlay:
+ * - Primary: com.google.android.tvlauncher/.inputs.InputsPanelActivity (Official Android TV Inputs Side Menu)
+ * - Secondary: Hardware port direct tuning (HDMI 1 ARC, HDMI 2, HDMI 3, AV, Antenna)
  */
 object TvInputManagerHelper {
+
+    private val NATIVE_INPUT_COMPONENTS = listOf(
+        ComponentName("com.google.android.tvlauncher", "com.google.android.tvlauncher.inputs.InputsPanelActivity"),
+        ComponentName("com.android.tv", "com.android.tv.MainActivity"),
+    )
+
+    /**
+     * Opens the native Android TV Inputs Side Menu / Overlay.
+     */
+    fun openNativeInputsMenu(context: Context): Boolean {
+        for (component in NATIVE_INPUT_COMPONENTS) {
+            try {
+                val intent = Intent().apply {
+                    setComponent(component)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return true
+            } catch (_: Exception) {}
+        }
+
+        // Fallback: Try general TV Input action
+        try {
+            val intent = Intent("android.media.tv.action.VIEW_INPUTS").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            return true
+        } catch (_: Exception) {}
+
+        Toast.makeText(context, "TV Inputs menu not available", Toast.LENGTH_SHORT).show()
+        return false
+    }
 
     val inputs = listOf(
         TvInputItem(
@@ -70,7 +103,6 @@ object TvInputManagerHelper {
             context.startActivity(intent)
         } catch (_: Exception) {
             try {
-                // Fallback to Live TV Activity
                 val intent = Intent(Intent.ACTION_MAIN).apply {
                     setClassName("com.android.tv", "com.android.tv.MainActivity")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

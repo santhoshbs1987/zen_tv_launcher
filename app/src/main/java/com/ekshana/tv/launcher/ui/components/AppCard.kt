@@ -88,15 +88,6 @@ fun AppCard(
                     return@onPreviewKeyEvent true
                 }
             }
-            KeyEvent.KEYCODE_DPAD_CENTER,
-            KeyEvent.KEYCODE_ENTER,
-            KeyEvent.KEYCODE_NUMPAD_ENTER,
-            KeyEvent.KEYCODE_BUTTON_A -> {
-                if (isFirstDown) {
-                    onClick()
-                    return@onPreviewKeyEvent true
-                }
-            }
         }
         false
     }
