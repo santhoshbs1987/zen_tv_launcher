@@ -63,6 +63,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         _lastFocusedPackage.value = packageName
     }
 
+    fun moveAppByPackage(packageName: String, delta: Int): Int = AppRepository.moveAppByPackage(packageName, delta)
+    fun resetAppOrder() = AppRepository.resetAppOrder()
+
     fun toggleHideApp(packageName: String) = AppRepository.toggleHideApp(packageName)
     fun unhideAllApps() = AppRepository.unhideAllApps()
 

@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 fun AppContextMenu(
     app: AppInfo,
     onToggleHide: () -> Unit,
+    onStartReorder: () -> Unit,
     onAppInfo: () -> Unit,
     onUninstall: () -> Unit,
     onDismiss: () -> Unit,
@@ -131,10 +132,22 @@ fun AppContextMenu(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // 1. Hide / Unhide
+                    // 1. Rearrange / Move App
+                    MenuActionButton(
+                        text = "⇄  Move / Rearrange App",
+                        focusRequester = firstButtonRequester,
+                        enabled = isReadyToAcceptClicks,
+                        onClick = {
+                            if (isReadyToAcceptClicks) {
+                                onStartReorder()
+                                onDismiss()
+                            }
+                        }
+                    )
+
+                    // 2. Hide / Unhide
                     MenuActionButton(
                         text = "👁  Hide from Home Grid",
-                        focusRequester = firstButtonRequester,
                         enabled = isReadyToAcceptClicks,
                         onClick = {
                             if (isReadyToAcceptClicks) {
@@ -144,7 +157,7 @@ fun AppContextMenu(
                         }
                     )
 
-                    // 2. App Info (System Details)
+                    // 3. App Info (System Details)
                     MenuActionButton(
                         text = "ℹ️  App Info & Permissions",
                         enabled = isReadyToAcceptClicks,
@@ -156,7 +169,7 @@ fun AppContextMenu(
                         }
                     )
 
-                    // 3. Uninstall App
+                    // 4. Uninstall App
                     MenuActionButton(
                         text = "🗑  Uninstall App",
                         isDanger = true,

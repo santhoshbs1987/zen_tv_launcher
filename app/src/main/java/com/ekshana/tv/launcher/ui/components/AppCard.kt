@@ -46,6 +46,9 @@ fun AppCard(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onFocused: () -> Unit = {},
+    isReordering: Boolean = false,
+    onMoveDirection: (delta: Int) -> Unit = {},
+    onFinishReordering: () -> Unit = {},
     focusRequester: FocusRequester? = null,
     cardHeight: Dp = 74.dp,
     modifier: Modifier = Modifier,
@@ -58,6 +61,38 @@ fun AppCard(
     val keyInterceptModifier = modifier.onPreviewKeyEvent { keyEvent ->
         val native = keyEvent.nativeKeyEvent
         val code = native.keyCode
+
+        if (isReordering) {
+            if (native.action == KeyEvent.ACTION_DOWN) {
+                when (code) {
+                    KeyEvent.KEYCODE_DPAD_LEFT -> {
+                        onMoveDirection(-1)
+                        return@onPreviewKeyEvent true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                        onMoveDirection(1)
+                        return@onPreviewKeyEvent true
+                    }
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        onMoveDirection(-6)
+                        return@onPreviewKeyEvent true
+                    }
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        onMoveDirection(6)
+                        return@onPreviewKeyEvent true
+                    }
+                    KeyEvent.KEYCODE_DPAD_CENTER,
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER,
+                    KeyEvent.KEYCODE_BACK -> {
+                        onFinishReordering()
+                        return@onPreviewKeyEvent true
+                    }
+                }
+            }
+            return@onPreviewKeyEvent false
+        }
+
         if (code == KeyEvent.KEYCODE_DPAD_CENTER ||
             code == KeyEvent.KEYCODE_ENTER ||
             code == KeyEvent.KEYCODE_NUMPAD_ENTER) {
@@ -102,19 +137,26 @@ fun AppCard(
     val style = remember(packageName, label) { getAppStyle(packageName, label) }
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.09f else 1.0f,
+        targetValue = if (isReordering) 1.12f else if (isFocused) 1.09f else 1.0f,
         animationSpec = tween(durationMillis = 180),
         label = "cardFocusScale"
     )
 
     Card(
-        onClick = onClick,
+        onClick = if (isReordering) onFinishReordering else onClick,
         onLongClick = { /* handled via onPreviewKeyEvent; fires on ACTION_UP after release */ },
         modifier = baseModifier
             .height(cardHeight)
             .scale(scale)
             .then(
-                if (isFocused) {
+                if (isReordering) {
+                    Modifier.shadow(
+                        elevation = 28.dp,
+                        shape = RoundedCornerShape(18.dp),
+                        ambientColor = Color(0xFF00E5FF),
+                        spotColor = Color(0xFF00E5FF)
+                    )
+                } else if (isFocused) {
                     Modifier.shadow(
                         elevation = 22.dp,
                         shape = RoundedCornerShape(18.dp),
@@ -129,13 +171,13 @@ fun AppCard(
         border = androidx.tv.material3.CardDefaults.border(
             border = androidx.tv.material3.Border(
                 border = BorderStroke(
-                    1.dp,
-                    if (isFocused) Color.White else style.borderColor.takeIf { it != Color.Transparent } ?: CardGlassBorder
+                    if (isReordering) 2.5.dp else 1.dp,
+                    if (isReordering) Color(0xFF00E5FF) else if (isFocused) Color.White else style.borderColor.takeIf { it != Color.Transparent } ?: CardGlassBorder
                 ),
                 shape = RoundedCornerShape(18.dp)
             ),
             focusedBorder = androidx.tv.material3.Border(
-                border = BorderStroke(3.dp, Color.White),
+                border = BorderStroke(if (isReordering) 3.5.dp else 3.dp, if (isReordering) Color(0xFF00E5FF) else Color.White),
                 shape = RoundedCornerShape(18.dp)
             )
         ),
