@@ -7,14 +7,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.ekshana.tv.launcher.data.AppInfo
 
 /**
  * 6-Column Landscape Squircle Grid.
- *
- * Each card is sized identically to the top row (74.dp height, proportional width).
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -31,7 +30,9 @@ fun AllAppsGrid(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(start = 44.dp, end = 44.dp, top = 8.dp, bottom = 32.dp),
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .focusRestorer(),
     ) {
         items(items = apps, key = { it.packageName }) { app ->
             AppCard(

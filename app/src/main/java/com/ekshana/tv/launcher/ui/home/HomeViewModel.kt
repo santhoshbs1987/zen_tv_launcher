@@ -1,6 +1,5 @@
 package com.ekshana.tv.launcher.ui.home
 
-import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -65,31 +64,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleHideApp(packageName: String) = AppRepository.toggleHideApp(packageName)
-    fun unhideAllApps() = AppRepository.unhideAllApps()
-
-    /**
-     * One-Tap RAM Cleaner: Kills background processes.
-     */
-    fun cleanRam(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-                val packages = AppRepository.rawApps.value.map { it.packageName }
-                for (pkg in packages) {
-                    if (pkg != context.packageName) {
-                        am?.killBackgroundProcesses(pkg)
-                    }
-                }
-                launch(Dispatchers.Main) {
-                    Toast.makeText(context, "⚡ Memory cleaned! TV RAM freed.", Toast.LENGTH_SHORT).show()
-                }
-            } catch (_: Exception) {
-                launch(Dispatchers.Main) {
-                    Toast.makeText(context, "Memory cleaned!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
     /**
      * Opens native Android TV system settings overlay.

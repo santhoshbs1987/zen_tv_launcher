@@ -40,11 +40,14 @@ object AppRepository {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var appContext: Context
+    private var initialized = false
+    val isInitialized: Boolean get() = initialized
 
     fun init(context: Context) {
         appContext = context.applicationContext
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         _hiddenApps.value = prefs.getStringSet(KEY_HIDDEN, emptySet()) ?: emptySet()
+        initialized = true
         refresh()
     }
 
@@ -121,12 +124,6 @@ object AppRepository {
         }
         _hiddenApps.value = current
         prefs.edit().putStringSet(KEY_HIDDEN, current).apply()
-        applyFilter()
-    }
-
-    fun unhideAllApps() {
-        _hiddenApps.value = emptySet()
-        prefs.edit().putStringSet(KEY_HIDDEN, emptySet()).apply()
         applyFilter()
     }
 
