@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Coaxial RF Metal Outer Body -->
+    <path
+        android:fillColor="#FF334155"
+        android:pathData="M14,6 L34,6 C36.2,6 38,7.8 38,10 L38,38 C38,40.2 36.2,42 34,42 L14,42 C11.8,42 10,40.2 10,38 L10,10 C10,7.8 11.8,6 14,6 Z" />
+    <!-- RF Outer Ring / Screw Threads -->
+    <path
+        android:fillColor="#FF94A3B8"
+        android:pathData="M24,24 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0" />
+    <!-- Dielectric Insulator -->
+    <path
+        android:fillColor="#FFF8FAFC"
+        android:pathData="M24,24 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+    <!-- Center RF Pin Receptacle -->
+    <path
+        android:fillColor="#FFF59E0B"
+        android:pathData="M24,24 m-2.5,0 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0" />
+</vector>

@@ -2,22 +2,20 @@ package com.ekshana.tv.launcher.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.tv.foundation.lazy.list.TvLazyRow
-import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.*
 import com.ekshana.tv.launcher.data.TvRecommendation
 import com.ekshana.tv.launcher.ui.theme.CardGlassBorder
@@ -45,14 +43,15 @@ fun RecommendationsRow(
             modifier = Modifier.padding(start = 44.dp, bottom = 8.dp)
         )
 
-        TvLazyRow(
-            contentPadding = PaddingValues(horizontal = 44.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRestorer()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 44.dp)
+                .focusRestorer(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            items(items = recommendations, key = { it.id }) { item ->
+            recommendations.forEach { item ->
                 Card(
                     onClick = { onRecommendationClick(item) },
                     shape = CardDefaults.shape(shape = RoundedCornerShape(14.dp)),

@@ -63,8 +63,8 @@ fun AppCard(
                 when (code) {
                     KeyEvent.KEYCODE_DPAD_LEFT -> { onMoveDirection(-1); return@onPreviewKeyEvent true }
                     KeyEvent.KEYCODE_DPAD_RIGHT -> { onMoveDirection(1); return@onPreviewKeyEvent true }
-                    KeyEvent.KEYCODE_DPAD_UP -> { onMoveDirection(-6); return@onPreviewKeyEvent true }
-                    KeyEvent.KEYCODE_DPAD_DOWN -> { onMoveDirection(6); return@onPreviewKeyEvent true }
+                    KeyEvent.KEYCODE_DPAD_UP -> { onMoveDirection(-5); return@onPreviewKeyEvent true }
+                    KeyEvent.KEYCODE_DPAD_DOWN -> { onMoveDirection(5); return@onPreviewKeyEvent true }
                     KeyEvent.KEYCODE_DPAD_CENTER,
                     KeyEvent.KEYCODE_ENTER,
                     KeyEvent.KEYCODE_NUMPAD_ENTER,

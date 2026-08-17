@@ -13,7 +13,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.ekshana.tv.launcher.data.AppInfo
 
 /**
- * 6-Column Landscape Squircle Grid.
+ * 5-Column Landscape Squircle Grid.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -29,7 +29,7 @@ fun AllAppsGrid(
     modifier: Modifier = Modifier,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(6),
+        columns = GridCells.Fixed(5),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(start = 44.dp, end = 44.dp, top = 8.dp, bottom = 32.dp),
@@ -50,7 +50,7 @@ fun AllAppsGrid(
                 onMoveDirection = { delta -> onMoveApp(app.packageName, delta) },
                 onFinishReordering = onFinishReordering,
                 focusRequester = focusRequesters[app.packageName],
-                cardHeight = 74.dp,
+                cardHeight = 78.dp,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

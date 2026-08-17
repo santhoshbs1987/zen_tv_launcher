@@ -2,28 +2,26 @@ package com.ekshana.tv.launcher.ui.components
 
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -35,6 +33,13 @@ import com.ekshana.tv.launcher.data.TvInputItem
 import com.ekshana.tv.launcher.ui.theme.*
 import kotlinx.coroutines.delay
 
+/**
+ * Native Android TV side panel for TV Inputs.
+ * Replicates the authentic right-docked Google TV / Android TV native Inputs Side Sheet:
+ * - Docks flush against the right edge of the screen (width ~340dp, height 100vh).
+ * - Dark semi-translucent scrim on the left.
+ * - Native TV Material 3 pill rows with active focus borders and high contrast typography.
+ */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun TvInputsModal(
@@ -48,7 +53,7 @@ fun TvInputsModal(
     BackHandler { onDismiss() }
 
     LaunchedEffect(Unit) {
-        delay(200)
+        delay(150)
         isReadyToAcceptClicks = true
         try {
             firstItemRequester.requestFocus()
@@ -58,7 +63,7 @@ fun TvInputsModal(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ModalScrim)
+            .background(Color(0x99000000))
             .onPreviewKeyEvent { keyEvent ->
                 if (!isReadyToAcceptClicks) {
                     val code = keyEvent.nativeKeyEvent.keyCode
@@ -68,48 +73,77 @@ fun TvInputsModal(
                 }
                 false
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.CenterEnd
     ) {
+        // Native Right-Docked Drawer Sheet
         Box(
             modifier = Modifier
-                .width(380.dp)
-                .heightIn(max = 440.dp)
-                .shadow(28.dp, RoundedCornerShape(22.dp), ambientColor = Color.Black, spotColor = Color.Black)
-                .clip(RoundedCornerShape(22.dp))
-                .background(ModalGlassBg)
-                .border(BorderStroke(1.dp, ModalGlassBorder), RoundedCornerShape(22.dp))
-                .padding(horizontal = 24.dp, vertical = 20.dp),
+                .fillMaxHeight()
+                .width(350.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xF0181A20),
+                            Color(0xF812141A)
+                        )
+                    )
+                )
+                .border(
+                    BorderStroke(1.dp, Color(0x2BFFFFFF)),
+                    shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
+                )
+                .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+                .padding(top = 28.dp, bottom = 24.dp, start = 20.dp, end = 20.dp)
         ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize()
             ) {
-                // Modal Title
-                Text(
-                    text = "TV Inputs",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = StatusTextPrimary,
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "Select source to switch TV input",
-                    fontSize = 11.5.sp,
-                    color = StatusTextSecondary,
-                )
-
-                Spacer(Modifier.height(16.dp))
-
-                // Inputs List
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                // Side Panel Header
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f, fill = false)
+                        .padding(bottom = 20.dp, start = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color(0x22FFFFFF), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "📺",
+                            fontSize = 18.sp
+                        )
+                    }
+                    Spacer(Modifier.width(14.dp))
+                    Column {
+                        Text(
+                            text = "Inputs",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            letterSpacing = 0.3.sp
+                        )
+                        Text(
+                            text = "TV Source",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF9E9E9E)
+                        )
+                    }
+                }
+
+                // Inputs Item List
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 ) {
                     items(inputs, key = { it.id }) { input ->
                         val isFirst = inputs.firstOrNull()?.id == input.id
-                        TvInputRowItem(
+                        NativeTvInputRowItem(
                             input = input,
                             focusRequester = if (isFirst) firstItemRequester else null,
                             enabled = isReadyToAcceptClicks,
@@ -123,31 +157,32 @@ fun TvInputsModal(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
 
+                // Footer / Back button
                 Button(
                     onClick = {
                         if (isReadyToAcceptClicks) onDismiss()
                     },
-                    shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
+                    shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
                     border = ButtonDefaults.border(
-                        border = Border(BorderStroke(1.dp, ButtonGlassBorder), shape = RoundedCornerShape(14.dp)),
-                        focusedBorder = Border(BorderStroke(2.dp, ButtonGlassFocusedBorder), shape = RoundedCornerShape(14.dp))
+                        border = Border(BorderStroke(1.dp, Color(0x1FFFFFFF)), shape = RoundedCornerShape(12.dp)),
+                        focusedBorder = Border(BorderStroke(2.dp, Color.White), shape = RoundedCornerShape(12.dp))
                     ),
                     colors = ButtonDefaults.colors(
-                        containerColor = ButtonGlassBg,
-                        focusedContainerColor = ButtonGlassFocusedBg
+                        containerColor = Color(0x14FFFFFF),
+                        focusedContainerColor = Color(0x33FFFFFF)
                     ),
-                    contentPadding = PaddingValues(vertical = 10.dp),
+                    contentPadding = PaddingValues(vertical = 11.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = "Close",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
-                        color = StatusTextSecondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        color = Color(0xFFCCCCCC),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
             }
@@ -157,19 +192,13 @@ fun TvInputsModal(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun TvInputRowItem(
+private fun NativeTvInputRowItem(
     input: TvInputItem,
     focusRequester: FocusRequester?,
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
-
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.03f else 1.0f,
-        animationSpec = tween(150),
-        label = "inputRowScale"
-    )
 
     val baseModifier = if (focusRequester != null) {
         Modifier
@@ -183,41 +212,50 @@ private fun TvInputRowItem(
         onClick = {
             if (enabled) onClick()
         },
-        shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
         scale = ButtonDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
         border = ButtonDefaults.border(
-            border = Border(BorderStroke(1.dp, ButtonGlassBorder), shape = RoundedCornerShape(12.dp)),
-            focusedBorder = Border(BorderStroke(2.dp, ButtonGlassFocusedBorder), shape = RoundedCornerShape(12.dp))
+            border = Border(BorderStroke(1.dp, Color(0x14FFFFFF)), shape = RoundedCornerShape(14.dp)),
+            focusedBorder = Border(BorderStroke(2.dp, Color.White), shape = RoundedCornerShape(14.dp))
         ),
         colors = ButtonDefaults.colors(
-            containerColor = ButtonGlassBg,
-            focusedContainerColor = ButtonGlassFocusedBg
+            containerColor = Color(0x1E222A38),
+            focusedContainerColor = Color(0xFF384358)
         ),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
-        modifier = baseModifier
-            .fillMaxWidth()
-            .scale(scale)
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+        modifier = baseModifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = input.icon,
-                fontSize = 14.sp
-            )
-            Spacer(Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .background(
+                        if (isFocused) Color(0x44FFFFFF) else Color(0x18FFFFFF),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = input.icon,
+                    fontSize = 16.sp
+                )
+            }
+            Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = input.label,
-                    fontSize = 13.5.sp,
-                    fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal,
-                    color = StatusTextPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Medium,
+                    color = Color.White,
                 )
                 Text(
                     text = input.description,
-                    fontSize = 10.sp,
-                    color = StatusTextSecondary,
+                    fontSize = 10.5.sp,
+                    color = if (isFocused) Color(0xFFE0E0E0) else Color(0xFF8E95A5),
+                    maxLines = 1,
                 )
             }
         }

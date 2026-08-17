@@ -11,7 +11,7 @@ data class TvInputItem(
     val label: String,
     val description: String,
     val icon: String,
-    val passthroughUri: Uri,
+    val passthroughUri: Uri? = null,
 )
 
 /**
@@ -50,7 +50,7 @@ object TvInputManagerHelper {
             id = "com.droidlogic.tvinput/.services.AV1InputService/HW1",
             label = "AV (Composite)",
             description = "Yellow (Video) · White (L) · Red (R)",
-            icon = "🟡",
+            icon = "📼",
             passthroughUri = TvContract.buildChannelUriForPassthroughInput("com.droidlogic.tvinput/.services.AV1InputService/HW1")
         ),
         TvInputItem(
@@ -87,6 +87,37 @@ object TvInputManagerHelper {
     }
 
     fun switchInput(context: Context, inputItem: TvInputItem) {
+        // Tuner-based Antenna/Live TV uses the Live TV activity directly (passthrough URIs are for HDMI/AV only)
+        if (inputItem.id.contains("ADTV", ignoreCase = true) || inputItem.passthroughUri == null) {
+            try {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    setClassName("com.android.tv", "com.android.tv.TvActivity")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return
+            } catch (_: Exception) {}
+
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("content://android.media.tv/channel")).apply {
+                    type = "vnd.android.cursor.dir/channel"
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return
+            } catch (_: Exception) {}
+
+            try {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    setClassName("com.droidlogic.droidlivetv", "com.droidlogic.droidlivetv.shortcut.ShortCutActivity")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return
+            } catch (_: Exception) {}
+        }
+
+        // Passthrough inputs (HDMI 1, HDMI 2, HDMI 3, AV)
         try {
             val intent = Intent(Intent.ACTION_VIEW, inputItem.passthroughUri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -95,7 +126,7 @@ object TvInputManagerHelper {
         } catch (_: Exception) {
             try {
                 val intent = Intent(Intent.ACTION_MAIN).apply {
-                    setClassName("com.android.tv", "com.android.tv.MainActivity")
+                    setClassName("com.android.tv", "com.android.tv.TvActivity")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)

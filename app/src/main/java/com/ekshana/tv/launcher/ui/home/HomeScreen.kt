@@ -127,22 +127,24 @@ fun HomeScreen(
                     .fillMaxSize()
                     .focusRestorer()
             ) {
-                // Top Status Bar (Interactive 24-hour clock, Wi-Fi, System Settings, Inputs, Hidden Apps)
+                // Top Status Bar (Interactive 24-hour clock, Wi-Fi, System Settings, Hidden Apps)
                 TopStatusBar(
                     hiddenCount = hiddenAppsList.size,
                     onHiddenAppsClick = { showHiddenAppsModal = true },
                     onClockClick = { viewModel.openDateSettings(context) },
                     onWifiClick = { viewModel.openWifiSettings(context) },
-                    onSettingsClick = { viewModel.openSystemSettings(context) },
-                    onInputsClick = {
-                        val openedNative = TvInputManagerHelper.openNativeInputsMenu(context)
-                        if (!openedNative) {
-                            showInputsModal = true
-                        }
-                    }
+                    onSettingsClick = { viewModel.openSystemSettings(context) }
                 )
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
+
+                // TV Hardware Inputs Row (HDMI 1 ARC, HDMI 2, HDMI 3, AV, Antenna)
+                com.ekshana.tv.launcher.ui.components.InputsRow(
+                    inputs = TvInputManagerHelper.inputs,
+                    onSelectInput = { input ->
+                        TvInputManagerHelper.switchInput(context, input)
+                    }
+                )
 
                 // Watch Next / OS TV Recommendations (TvContractCompat)
                 if (uiState.recommendations.isNotEmpty()) {
@@ -274,7 +276,6 @@ private fun TopStatusBar(
     onClockClick: () -> Unit,
     onWifiClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onInputsClick: () -> Unit,
 ) {
     val context = LocalContext.current
     var timeStr by remember { mutableStateOf(getSystemFormattedTime(context)) }
@@ -331,21 +332,6 @@ private fun TopStatusBar(
                 Image(
                     painter = painterResource(R.drawable.ic_settings),
                     contentDescription = "System Settings",
-                    colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
-                    modifier = Modifier.size(19.dp)
-                )
-            }
-        )
-
-        Spacer(Modifier.width(10.dp))
-
-        // TV Inputs Side Menu Button (Opens native Android TV Inputs side panel)
-        StatusIconButton(
-            onClick = onInputsClick,
-            content = { isFocused ->
-                Image(
-                    painter = painterResource(R.drawable.ic_tune),
-                    contentDescription = "TV Inputs",
                     colorFilter = ColorFilter.tint(if (isFocused) StatusIconActive else StatusIconColor),
                     modifier = Modifier.size(19.dp)
                 )
