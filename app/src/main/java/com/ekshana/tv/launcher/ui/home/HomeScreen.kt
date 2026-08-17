@@ -52,6 +52,7 @@ fun HomeScreen(
 
     var selectedContextApp by remember { mutableStateOf<AppInfo?>(null) }
     var showHiddenAppsModal by remember { mutableStateOf(false) }
+    var showInputsModal by remember { mutableStateOf(false) }
     var reorderingPackage by remember { mutableStateOf<String?>(null) }
     var focusedAppLabel by remember { mutableStateOf<String?>(null) }
 
@@ -72,12 +73,15 @@ fun HomeScreen(
 
     LaunchedEffect(inputPressedTrigger) {
         if (inputPressedTrigger > 0L) {
-            TvInputManagerHelper.openNativeInputsMenu(context)
+            val openedNative = TvInputManagerHelper.openNativeInputsMenu(context)
+            if (!openedNative) {
+                showInputsModal = true
+            }
         }
     }
 
-    LaunchedEffect(selectedContextApp, reorderingPackage, uiState.isLoading) {
-        val isOverlayOpen = selectedContextApp != null || reorderingPackage != null
+    LaunchedEffect(selectedContextApp, showInputsModal, showHiddenAppsModal, reorderingPackage, uiState.isLoading) {
+        val isOverlayOpen = selectedContextApp != null || showInputsModal || showHiddenAppsModal || reorderingPackage != null
         if (!isOverlayOpen && !uiState.isLoading) {
             delay(150)
             try {
@@ -89,12 +93,13 @@ fun HomeScreen(
         }
     }
 
-    val isAnyOverlayOpen = selectedContextApp != null || reorderingPackage != null
+    val isAnyOverlayOpen = selectedContextApp != null || showInputsModal || showHiddenAppsModal || reorderingPackage != null
     BackHandler(enabled = isAnyOverlayOpen) {
-        if (reorderingPackage != null) {
-            reorderingPackage = null
-        } else if (selectedContextApp != null) {
-            selectedContextApp = null
+        when {
+            reorderingPackage != null -> reorderingPackage = null
+            showInputsModal -> showInputsModal = false
+            showHiddenAppsModal -> showHiddenAppsModal = false
+            selectedContextApp != null -> selectedContextApp = null
         }
     }
 
@@ -129,7 +134,12 @@ fun HomeScreen(
                     onClockClick = { viewModel.openDateSettings(context) },
                     onWifiClick = { viewModel.openWifiSettings(context) },
                     onSettingsClick = { viewModel.openSystemSettings(context) },
-                    onInputsClick = { TvInputManagerHelper.openNativeInputsMenu(context) }
+                    onInputsClick = {
+                        val openedNative = TvInputManagerHelper.openNativeInputsMenu(context)
+                        if (!openedNative) {
+                            showInputsModal = true
+                        }
+                    }
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -236,6 +246,17 @@ fun HomeScreen(
                 onUnhideApp = { app -> viewModel.toggleHideApp(app.packageName) },
                 onUnhideAll = { viewModel.unhideAllApps() },
                 onDismiss = { showHiddenAppsModal = false }
+            )
+        }
+
+        // In-Hierarchy Modal Overlay: TV Inputs Switcher (HDMI 1 ARC, HDMI 2, HDMI 3, AV, Antenna)
+        if (showInputsModal) {
+            com.ekshana.tv.launcher.ui.components.TvInputsModal(
+                inputs = TvInputManagerHelper.inputs,
+                onSelectInput = { input ->
+                    TvInputManagerHelper.switchInput(context, input)
+                },
+                onDismiss = { showInputsModal = false }
             )
         }
     }
