@@ -21,7 +21,13 @@ class PackageChangeReceiver : BroadcastReceiver() {
             Intent.ACTION_PACKAGE_REMOVED,
             Intent.ACTION_PACKAGE_CHANGED,
             Intent.ACTION_PACKAGE_REPLACED,
-            -> AppRepository.refresh()
+            -> {
+                if (!AppRepository.isInitialized) {
+                    AppRepository.init(context)
+                } else {
+                    AppRepository.refresh()
+                }
+            }
         }
     }
 }

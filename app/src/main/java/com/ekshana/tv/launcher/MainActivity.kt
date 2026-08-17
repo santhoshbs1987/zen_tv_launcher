@@ -20,7 +20,6 @@ import com.ekshana.tv.launcher.ui.theme.ZenLauncherTheme
 
 class MainActivity : ComponentActivity() {
 
-    private var menuPressedTrigger by mutableStateOf(0L)
     private var inputPressedTrigger by mutableStateOf(0L)
 
     @OptIn(ExperimentalTvMaterial3Api::class)
@@ -35,7 +34,6 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape,
                 ) {
                     HomeScreen(
-                        menuPressedTrigger = menuPressedTrigger,
                         inputPressedTrigger = inputPressedTrigger,
                     )
                 }
@@ -51,24 +49,17 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Intercept Remote Keys:
-     * 1. Power (Top)
-     * 2. D-pad Circle (Up, Down, Left, Right, Center/OK)
-     * 3. Home Button -> Returns directly to Zen Launcher home
-     * 4. Back Button -> Handled by Compose BackHandler
-     * 5. Menu Button -> Opens Settings when on Home, or Context Menu on focused app
-     * 6. Inputs Button -> Quick TV source switcher
+     * Intercept Remote D-pad & Source keys.
+     *
+     * NOTE on Xiaomi Mi TV 4A physical IR remote:
+     * - Volume +/-  : Consumed by Android AudioManager at HAL level (never reaches app).
+     * - Home (⊙)   : Consumed by Android ActivityManager (triggers home intent directly).
+     * - Menu (☰)   : Consumed by Xiaomi firmware before Java — opens Xiaomi system panel.
+     * Only the D-pad, OK, Back, and TV-Input source keycodes reach this activity.
      */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (event?.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+        if (event?.repeatCount == 0) {
             when (keyCode) {
-                // Settings & Guide shortcuts
-                KeyEvent.KEYCODE_SETTINGS,
-                KeyEvent.KEYCODE_GUIDE -> {
-                    menuPressedTrigger = System.currentTimeMillis()
-                    return true
-                }
-                // Source / Input switching keys
                 KeyEvent.KEYCODE_TV_INPUT,
                 KeyEvent.KEYCODE_TV_INPUT_COMPOSITE_1,
                 KeyEvent.KEYCODE_TV_INPUT_HDMI_1,
