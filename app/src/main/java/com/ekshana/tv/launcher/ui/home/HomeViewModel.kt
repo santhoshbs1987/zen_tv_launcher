@@ -64,6 +64,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleHideApp(packageName: String) = AppRepository.toggleHideApp(packageName)
+    fun unhideAllApps() = AppRepository.unhideAllApps()
 
     /**
      * Opens native Android TV system settings overlay.

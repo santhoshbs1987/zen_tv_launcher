@@ -51,41 +51,51 @@ fun AppCard(
     modifier: Modifier = Modifier,
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    // True once the key has been held long enough (first repeat) — armed state
+    // We defer the menu open to ACTION_UP so the key is already released when the menu appears.
+    var longPressArmed by remember { mutableStateOf(false) }
+
+    val keyInterceptModifier = modifier.onPreviewKeyEvent { keyEvent ->
+        val native = keyEvent.nativeKeyEvent
+        val code = native.keyCode
+        if (code == KeyEvent.KEYCODE_DPAD_CENTER ||
+            code == KeyEvent.KEYCODE_ENTER ||
+            code == KeyEvent.KEYCODE_NUMPAD_ENTER) {
+            when (native.action) {
+                KeyEvent.ACTION_DOWN -> {
+                    if (native.repeatCount >= 1 && !longPressArmed) {
+                        // Key held past initial threshold → arm the long press
+                        longPressArmed = true
+                        return@onPreviewKeyEvent true // consume so Card never sees it
+                    }
+                    if (longPressArmed) {
+                        return@onPreviewKeyEvent true // consume all subsequent repeats
+                    }
+                }
+                KeyEvent.ACTION_UP -> {
+                    if (longPressArmed) {
+                        longPressArmed = false
+                        onLongClick() // Safe: key is RELEASED before menu opens
+                        return@onPreviewKeyEvent true // consume so Card's onClick doesn't fire
+                    }
+                }
+            }
+        }
+        false
+    }
 
     val baseModifier = if (focusRequester != null) {
-        modifier
+        keyInterceptModifier
             .focusRequester(focusRequester)
             .onFocusChanged { state ->
                 isFocused = state.isFocused
                 if (state.isFocused) onFocused()
             }
     } else {
-        modifier.onFocusChanged { state ->
+        keyInterceptModifier.onFocusChanged { state ->
             isFocused = state.isFocused
             if (state.isFocused) onFocused()
         }
-    }
-
-    val cardModifier = baseModifier.onPreviewKeyEvent { keyEvent ->
-        val native = keyEvent.nativeKeyEvent
-        val code = native.keyCode
-        val isActionDown = native.action == KeyEvent.ACTION_DOWN
-        val isFirstDown = isActionDown && native.repeatCount == 0
-
-        when (code) {
-            KeyEvent.KEYCODE_MENU,
-            KeyEvent.KEYCODE_GUIDE,
-            KeyEvent.KEYCODE_INFO,
-            KeyEvent.KEYCODE_PROG_BLUE,
-            KeyEvent.KEYCODE_BOOKMARK,
-            KeyEvent.KEYCODE_BUTTON_Y -> {
-                if (isFirstDown) {
-                    onLongClick()
-                    return@onPreviewKeyEvent true
-                }
-            }
-        }
-        false
     }
 
     val isBanner = iconBitmap != null && iconBitmap.width > iconBitmap.height * 1.3f
@@ -99,8 +109,8 @@ fun AppCard(
 
     Card(
         onClick = onClick,
-        onLongClick = onLongClick,
-        modifier = cardModifier
+        onLongClick = { /* handled via onPreviewKeyEvent; fires on ACTION_UP after release */ },
+        modifier = baseModifier
             .height(cardHeight)
             .scale(scale)
             .then(
@@ -219,6 +229,15 @@ fun AppCard(
                         )
                     )
             )
+
+            // Long-press visual feedback: subtle pulsing border glow when key is held
+            if (longPressArmed) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(2.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+                )
+            }
         }
     }
 }

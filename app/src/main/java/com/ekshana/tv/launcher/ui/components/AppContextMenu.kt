@@ -1,5 +1,6 @@
 package com.ekshana.tv.launcher.ui.components
 
+import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,6 +20,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,7 +35,7 @@ import com.ekshana.tv.launcher.ui.theme.*
 import kotlinx.coroutines.delay
 
 /**
- * In-Hierarchy Floating Glass Context Menu Modal.
+ * In-Hierarchy Floating Glass Context Menu Modal with Key-Release Long-Press Protection.
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -45,11 +47,16 @@ fun AppContextMenu(
     onDismiss: () -> Unit,
 ) {
     val firstButtonRequester = remember { FocusRequester() }
+    var isReadyToAcceptClicks by remember { mutableStateOf(false) }
 
     BackHandler { onDismiss() }
 
+    // 100ms: allow Compose to settle after recomposition before accepting D-pad focus.
+    // The synthetic ACTION_UP click bug is now fully fixed upstream in AppCard.kt
+    // (menu opens on ACTION_UP, not on long-press threshold while key is still down).
     LaunchedEffect(Unit) {
-        delay(120)
+        delay(100)
+        isReadyToAcceptClicks = true
         try {
             firstButtonRequester.requestFocus()
         } catch (_: Exception) { /* ignore */ }
@@ -58,7 +65,17 @@ fun AppContextMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ModalScrim),
+            .background(ModalScrim)
+            .onPreviewKeyEvent { keyEvent ->
+                // Swallow all remote DPAD_CENTER / ENTER key events during modal opening to prevent synthetic release clicks
+                if (!isReadyToAcceptClicks) {
+                    val code = keyEvent.nativeKeyEvent.keyCode
+                    if (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_NUMPAD_ENTER) {
+                        return@onPreviewKeyEvent true
+                    }
+                }
+                false
+            },
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -118,18 +135,24 @@ fun AppContextMenu(
                     MenuActionButton(
                         text = "👁  Hide from Home Grid",
                         focusRequester = firstButtonRequester,
+                        enabled = isReadyToAcceptClicks,
                         onClick = {
-                            onToggleHide()
-                            onDismiss()
+                            if (isReadyToAcceptClicks) {
+                                onToggleHide()
+                                onDismiss()
+                            }
                         }
                     )
 
                     // 2. App Info (System Details)
                     MenuActionButton(
                         text = "ℹ️  App Info & Permissions",
+                        enabled = isReadyToAcceptClicks,
                         onClick = {
-                            onAppInfo()
-                            onDismiss()
+                            if (isReadyToAcceptClicks) {
+                                onAppInfo()
+                                onDismiss()
+                            }
                         }
                     )
 
@@ -137,9 +160,12 @@ fun AppContextMenu(
                     MenuActionButton(
                         text = "🗑  Uninstall App",
                         isDanger = true,
+                        enabled = isReadyToAcceptClicks,
                         onClick = {
-                            onUninstall()
-                            onDismiss()
+                            if (isReadyToAcceptClicks) {
+                                onUninstall()
+                                onDismiss()
+                            }
                         }
                     )
                 }
@@ -148,7 +174,9 @@ fun AppContextMenu(
 
                 // Close / Cancel Button
                 Button(
-                    onClick = onDismiss,
+                    onClick = {
+                        if (isReadyToAcceptClicks) onDismiss()
+                    },
                     shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
                     border = ButtonDefaults.border(
                         border = Border(
@@ -197,6 +225,7 @@ private fun MenuActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isDanger: Boolean = false,
+    enabled: Boolean = true,
     focusRequester: FocusRequester? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -216,7 +245,9 @@ private fun MenuActionButton(
     }
 
     Button(
-        onClick = onClick,
+        onClick = {
+            if (enabled) onClick()
+        },
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
         scale = ButtonDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
         border = ButtonDefaults.border(

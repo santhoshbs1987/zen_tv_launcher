@@ -127,6 +127,12 @@ object AppRepository {
         applyFilter()
     }
 
+    fun unhideAllApps() {
+        _hiddenApps.value = emptySet()
+        prefs.edit().putStringSet(KEY_HIDDEN, emptySet()).apply()
+        applyFilter()
+    }
+
     fun isHidden(packageName: String): Boolean = _hiddenApps.value.contains(packageName)
 
     private const val PREFS_NAME = "zen_launcher_prefs"

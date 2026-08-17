@@ -43,7 +43,6 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
-    menuPressedTrigger: Long = 0L,
     inputPressedTrigger: Long = 0L,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -51,23 +50,21 @@ fun HomeScreen(
     val context = LocalContext.current
 
     var selectedContextApp by remember { mutableStateOf<AppInfo?>(null) }
+    var showHiddenAppsModal by remember { mutableStateOf(false) }
     var focusedAppLabel by remember { mutableStateOf<String?>(null) }
 
     val gridFocusRequesters = remember { mutableStateMapOf<String, FocusRequester>() }
 
     val displayApps = uiState.allApps
+    val hiddenAppsList = remember(uiState.rawApps, uiState.hiddenApps) {
+        uiState.rawApps.filter { uiState.hiddenApps.contains(it.packageName) }
+    }
 
     LaunchedEffect(displayApps) {
         displayApps.forEach { app ->
             if (!gridFocusRequesters.containsKey(app.packageName)) {
                 gridFocusRequesters[app.packageName] = FocusRequester()
             }
-        }
-    }
-
-    LaunchedEffect(menuPressedTrigger) {
-        if (menuPressedTrigger > 0L) {
-            viewModel.openSystemSettings(context)
         }
     }
 
@@ -122,8 +119,10 @@ fun HomeScreen(
                     .fillMaxSize()
                     .focusRestorer()
             ) {
-                // Top Status Bar (Interactive 24-hour clock, Wi-Fi, System Settings, Inputs)
+                // Top Status Bar (Interactive 24-hour clock, Wi-Fi, System Settings, Inputs, Hidden Apps)
                 TopStatusBar(
+                    hiddenCount = hiddenAppsList.size,
+                    onHiddenAppsClick = { showHiddenAppsModal = true },
                     onClockClick = { viewModel.openDateSettings(context) },
                     onWifiClick = { viewModel.openWifiSettings(context) },
                     onSettingsClick = { viewModel.openSystemSettings(context) },
@@ -171,6 +170,16 @@ fun HomeScreen(
                 onDismiss = { selectedContextApp = null },
             )
         }
+
+        // In-Hierarchy Modal Overlay: Hidden Apps Manager
+        if (showHiddenAppsModal && hiddenAppsList.isNotEmpty()) {
+            com.ekshana.tv.launcher.ui.components.HiddenAppsModal(
+                hiddenApps = hiddenAppsList,
+                onUnhideApp = { app -> viewModel.toggleHideApp(app.packageName) },
+                onUnhideAll = { viewModel.unhideAllApps() },
+                onDismiss = { showHiddenAppsModal = false }
+            )
+        }
     }
 }
 
@@ -181,6 +190,8 @@ fun HomeScreen(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun TopStatusBar(
+    hiddenCount: Int,
+    onHiddenAppsClick: () -> Unit,
     onClockClick: () -> Unit,
     onWifiClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -203,6 +214,14 @@ private fun TopStatusBar(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (hiddenCount > 0) {
+            StatusTextButton(
+                text = "👁 Hidden ($hiddenCount)",
+                onClick = onHiddenAppsClick
+            )
+            Spacer(Modifier.width(12.dp))
+        }
+
         // Interactive System Clock (Opens native OS Date & Time panel)
         StatusTextButton(
             text = timeStr,
