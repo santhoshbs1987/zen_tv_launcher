@@ -101,25 +101,20 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundGradient),
+            .background(ZenBgTop),
     ) {
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Zen Launcher",
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = StatusTextPrimary,
-                        letterSpacing = 0.5.sp
-                    )
-                }
+                Text(
+                    text = "Zen Launcher",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = StatusTextPrimary,
+                    letterSpacing = 0.5.sp
+                )
             }
         } else {
             Column(
@@ -137,7 +132,7 @@ fun HomeScreen(
                     onInputsClick = { TvInputManagerHelper.openNativeInputsMenu(context) }
                 )
 
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(8.dp))
 
                 // Watch Next / OS TV Recommendations (TvContractCompat)
                 if (uiState.recommendations.isNotEmpty()) {

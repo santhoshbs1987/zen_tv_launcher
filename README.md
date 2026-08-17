@@ -39,23 +39,76 @@ Check out the full **[Zen Launcher GitHub Wiki](https://github.com/santhoshbs198
 ## 🛠️ Tech Stack & Architecture
 
 - **Application ID / Package**: `com.ekshana.tv.launcher`
-- **Language**: Kotlin 2.0+
-- **UI Framework**: [Jetpack Compose for TV](https://developer.android.com/develop/ui/compose/tv) (`androidx.tv:tv-material` & `androidx.tv:tv-foundation`)
-- **Target SDK**: Android 14 / Android 15 (Target SDK 37, Min SDK 24 / Android 7.0+)
-- **Architecture**: Single Activity (`MainActivity`) + StateFlow Reactive MVVM Pattern
-- **Persistence**: Fast and synchronous `SharedPreferences` for favourites and hidden app configuration
-- **Image Pipeline**: In-memory `ConcurrentHashMap` with hardware-friendly 96x96 bitmap decoding
+- **Language**: Kotlin 2.0+ (Jetpack Compose 1.7+)
+- **UI Framework**: [Jetpack Compose for TV](https://developer.android.com/develop/ui/compose/tv) (Material 3)
+- **Target SDK**: 35 (Android 15) | **Min SDK**: 24 (Android 7.0+)
+- **Architecture**: Reactive MVVM with Kotlin Coroutines & `StateFlow`
+- **Background Pipeline**: Auto-refresh app lists via `PackageChangeReceiver` (broadcast listener)
+- **Persistence**: Synchronous `SharedPreferences` for ultra-low latency state restoration
 
 ---
 
-## 🚀 Setup as Default Launcher (Mi TV / Android TV)
+## 🤝 Contribution & Engineering Guide
 
-1. **Install via ADB**:
-   ```bash
-   adb install -r app/build/outputs/apk/release/app-release.apk
-   ```
+If you are a developer or using an AI coding agent to work on this project, please refer to **[AGENTS.md](AGENTS.md)**. It contains:
+- Strict engineering rules for RAM management.
+- Focus preservation guidelines.
+- Vector rendering fallbacks for Android 9.
+- Detailed remote key event capture data.
 
-2. **Set as Default Home**:
-   ```bash
-   adb shell cmd package set-home-activity com.ekshana.tv.launcher/.MainActivity
-   ```
+---
+
+## 📐 Hardware Specifications & Target Profile
+
+While Zen Launcher supports Android 7.0+, it is specifically optimized for low-spec Smart TVs and TV sticks:
+- **Primary Testing Target**: Xiaomi Mi LED Smart TV 4A 32" (`magnolia`) / Android TV 9 (API 28).
+- **RAM Footprint**: Idles at **≤ 35 MB PSS** to reserve maximum resources for heavy streaming apps (Netflix, Prime Video, etc.).
+- **Resolution**: Native 720p HD (`1280x720`) at `213 dpi` (TVDPI).
+- **Safe Viewport**: Built-in **44dp horizontal** and **16dp vertical** overscan padding on all root containers.
+
+---
+
+## 🎮 Remote Key Mapping & Interaction
+
+Zen Launcher is 100% remote D-pad driven. It includes custom logic to handle peculiarities of Xiaomi and generic TV remotes:
+
+| Button | Behaviour in Zen Launcher |
+|---|---|
+| **D-pad ↑↓←→** | Grid & TopBar focus traversal |
+| **OK / Center** | Short press: launch app / confirm |
+| **OK / Center (hold)** | Long press: opens Context Menu (Hide, Info, Uninstall) |
+| **Back `<`** | Dismiss modal / restore focus |
+| **Home `⊙`** | Returns to Zen Launcher |
+| **Menu `☰` / Settings** | Opens Launcher Preferences (where supported) |
+
+> [!IMPORTANT]
+> **Xiaomi Remote Note**: The physical `☰` (Menu) button on some Xiaomi remotes is intercepted by system firmware and does not reach any app. Use long-press on **OK** to access app-specific options.
+
+---
+
+## 🏗️ Technical Architecture & "Secret Sauce"
+
+Zen Launcher solves several common Jetpack Compose for TV issues on older Android versions:
+
+- **No `androidx.compose.ui.window.Dialog`**: We avoid secondary windows which cause DPAD focus drops and synthetic click bugs on Android 9. All modals are **in-hierarchy overlays** with `BackHandler` support.
+- **Long-Press Synthetic Click Fix**: Uses a custom `onPreviewKeyEvent` pipeline to ensure context menus open **after** key release, preventing unwanted accidental clicks.
+- **Async 2-Stage Pipeline**: Apps are discovered instantly; high-quality icons are decoded in the background to 96x96 hardware-friendly bitmaps and cached in `ConcurrentHashMap`.
+- **Focus Memory**: Uses `Modifier.focusRestorer()` to ensure the D-pad returns to your last selected app when navigating between rows.
+
+---
+
+## 🚀 Development & Build Commands
+
+For developers and contributors, see [AGENTS.md](AGENTS.md) for the full engineering guide.
+
+```bash
+# Debug build, install, and launch on connected TV
+./gradlew assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -n com.ekshana.tv.launcher/.MainActivity
+
+# Set as default Home launcher via ADB
+adb shell cmd package set-home-activity com.ekshana.tv.launcher/.MainActivity
+
+# Check memory footprint
+adb shell dumpsys meminfo com.ekshana.tv.launcher
+```
+
