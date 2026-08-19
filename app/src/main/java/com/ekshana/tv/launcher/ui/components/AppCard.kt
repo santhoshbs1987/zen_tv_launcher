@@ -212,80 +212,84 @@ data class AppCardStyle(
     val borderColor: Color = Color.Transparent,
 )
 
-fun getAppStyle(packageName: String, label: String): AppCardStyle {
-    val pkg = packageName.lowercase()
-    val name = label.lowercase()
+private val styleCache = java.util.concurrent.ConcurrentHashMap<String, AppCardStyle>()
 
-    return when {
-        pkg.contains("netflix") || name.contains("netflix") -> AppCardStyle(
-            bgColor = Color(0xFFFFFFFF),
-            textColor = Color(0xFFE50914),
-            borderColor = Color(0x20000000)
-        )
-        pkg.contains("youtube") || name.contains("youtube") || pkg.contains("smarttube") -> AppCardStyle(
-            bgColor = Color(0xFFF4F4F6),
-            textColor = Color(0xFF282828),
-            borderColor = Color(0x20000000)
-        )
-        pkg.contains("amazon") && pkg.contains("video") || name.contains("prime") -> AppCardStyle(
-            bgColor = Color(0xFF0072A0),
-            textColor = Color.White
-        )
-        pkg.contains("appletv") -> AppCardStyle(
-            bgColor = Color(0xFF1B1D22),
-            textColor = Color.White
-        )
-        pkg.contains("jellyfin") || name.contains("jellyfin") -> AppCardStyle(
-            bgColor = Color(0xFF00A4DC),
-            textColor = Color.White
-        )
-        pkg.contains("mxtech") || name.contains("mx player") -> AppCardStyle(
-            bgColor = Color(0xFF0C78E4),
-            textColor = Color.White
-        )
-        pkg.contains("hotstar") || name.contains("hotstar") || name.contains("disney") -> AppCardStyle(
-            bgColor = Color(0xFF0C5FE8),
-            textColor = Color.White
-        )
-        pkg.contains("sonyliv") || name.contains("sonyliv") || name.contains("sony liv") -> AppCardStyle(
-            bgColor = Color(0xFF12141A),
-            textColor = Color.White
-        )
-        pkg.contains("stremio") || name.contains("stremio") -> AppCardStyle(
-            bgColor = Color(0xFF14172C),
-            textColor = Color.White
-        )
-        pkg.contains("browsehere") || name.contains("browsehere") || name.contains("browser") -> AppCardStyle(
-            bgColor = Color(0xFF2563EB),
-            textColor = Color.White
-        )
-        pkg.contains("settings") || name.contains("setting") -> AppCardStyle(
-            bgColor = Color(0xFF475569),
-            textColor = Color.White
-        )
-        pkg.contains("downloader") || name.contains("downloader") -> AppCardStyle(
-            bgColor = Color(0xFFEA580C),
-            textColor = Color.White
-        )
-        pkg.contains("vending") || pkg.contains("play") || name.contains("play") -> AppCardStyle(
-            bgColor = Color(0xFFFFFFFF),
-            textColor = Color(0xFF1E293B)
-        )
-        name == "tv" || pkg.contains("android.tv") || name.contains("channels") -> AppCardStyle(
-            bgColor = Color(0xFFFFFFFF),
-            textColor = Color(0xFF991B1B)
-        )
-        name.contains("media") || name.contains("gallery") || name.contains("photo") -> AppCardStyle(
-            bgColor = Color(0xFF283244),
-            textColor = Color.White
-        )
-        else -> {
-            val hash = (pkg.hashCode() and 0x7FFFFFFF) % 4
-            when (hash) {
-                0 -> AppCardStyle(bgColor = Color(0xFF1E293B))
-                1 -> AppCardStyle(bgColor = Color(0xFF263238))
-                2 -> AppCardStyle(bgColor = Color(0xFF334155))
-                else -> AppCardStyle(bgColor = Color(0xFF1F2937))
+fun getAppStyle(packageName: String, label: String): AppCardStyle {
+    return styleCache.computeIfAbsent(packageName) {
+        val pkg = packageName.lowercase()
+        val name = label.lowercase()
+
+        when {
+            pkg.contains("netflix") || name.contains("netflix") -> AppCardStyle(
+                bgColor = Color(0xFFFFFFFF),
+                textColor = Color(0xFFE50914),
+                borderColor = Color(0x20000000)
+            )
+            pkg.contains("youtube") || name.contains("youtube") || pkg.contains("smarttube") -> AppCardStyle(
+                bgColor = Color(0xFFF4F4F6),
+                textColor = Color(0xFF282828),
+                borderColor = Color(0x20000000)
+            )
+            pkg.contains("amazon") && pkg.contains("video") || name.contains("prime") -> AppCardStyle(
+                bgColor = Color(0xFF0072A0),
+                textColor = Color.White
+            )
+            pkg.contains("appletv") -> AppCardStyle(
+                bgColor = Color(0xFF1B1D22),
+                textColor = Color.White
+            )
+            pkg.contains("jellyfin") || name.contains("jellyfin") -> AppCardStyle(
+                bgColor = Color(0xFF00A4DC),
+                textColor = Color.White
+            )
+            pkg.contains("mxtech") || name.contains("mx player") -> AppCardStyle(
+                bgColor = Color(0xFF0C78E4),
+                textColor = Color.White
+            )
+            pkg.contains("hotstar") || name.contains("hotstar") || name.contains("disney") -> AppCardStyle(
+                bgColor = Color(0xFF0C5FE8),
+                textColor = Color.White
+            )
+            pkg.contains("sonyliv") || name.contains("sonyliv") || name.contains("sony liv") -> AppCardStyle(
+                bgColor = Color(0xFF12141A),
+                textColor = Color.White
+            )
+            pkg.contains("stremio") || name.contains("stremio") -> AppCardStyle(
+                bgColor = Color(0xFF14172C),
+                textColor = Color.White
+            )
+            pkg.contains("browsehere") || name.contains("browsehere") || name.contains("browser") -> AppCardStyle(
+                bgColor = Color(0xFF2563EB),
+                textColor = Color.White
+            )
+            pkg.contains("settings") || name.contains("setting") -> AppCardStyle(
+                bgColor = Color(0xFF475569),
+                textColor = Color.White
+            )
+            pkg.contains("downloader") || name.contains("downloader") -> AppCardStyle(
+                bgColor = Color(0xFFEA580C),
+                textColor = Color.White
+            )
+            pkg.contains("vending") || pkg.contains("play") || name.contains("play") -> AppCardStyle(
+                bgColor = Color(0xFFFFFFFF),
+                textColor = Color(0xFF1E293B)
+            )
+            name == "tv" || pkg.contains("android.tv") || name.contains("channels") -> AppCardStyle(
+                bgColor = Color(0xFFFFFFFF),
+                textColor = Color(0xFF991B1B)
+            )
+            name.contains("media") || name.contains("gallery") || name.contains("photo") -> AppCardStyle(
+                bgColor = Color(0xFF283244),
+                textColor = Color.White
+            )
+            else -> {
+                val hash = (pkg.hashCode() and 0x7FFFFFFF) % 4
+                when (hash) {
+                    0 -> AppCardStyle(bgColor = Color(0xFF1E293B))
+                    1 -> AppCardStyle(bgColor = Color(0xFF263238))
+                    2 -> AppCardStyle(bgColor = Color(0xFF334155))
+                    else -> AppCardStyle(bgColor = Color(0xFF1F2937))
+                }
             }
         }
     }

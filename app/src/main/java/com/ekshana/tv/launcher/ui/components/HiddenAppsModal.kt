@@ -45,13 +45,10 @@ fun HiddenAppsModal(
     onDismiss: () -> Unit,
 ) {
     val firstItemRequester = remember { FocusRequester() }
-    var isReadyToAcceptClicks by remember { mutableStateOf(false) }
 
     BackHandler { onDismiss() }
 
     LaunchedEffect(Unit) {
-        delay(300)
-        isReadyToAcceptClicks = true
         try {
             firstItemRequester.requestFocus()
         } catch (_: Exception) { /* ignore */ }
@@ -60,16 +57,7 @@ fun HiddenAppsModal(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ModalScrim)
-            .onPreviewKeyEvent { keyEvent ->
-                if (!isReadyToAcceptClicks) {
-                    val code = keyEvent.nativeKeyEvent.keyCode
-                    if (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_NUMPAD_ENTER) {
-                        return@onPreviewKeyEvent true
-                    }
-                }
-                false
-            },
+            .background(ModalScrim),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -114,10 +102,7 @@ fun HiddenAppsModal(
                         HiddenAppRowItem(
                             app = app,
                             focusRequester = if (isFirst) firstItemRequester else null,
-                            enabled = isReadyToAcceptClicks,
-                            onUnhide = {
-                                if (isReadyToAcceptClicks) onUnhideApp(app)
-                            }
+                            onUnhide = { onUnhideApp(app) }
                         )
                     }
                 }
@@ -131,10 +116,8 @@ fun HiddenAppsModal(
                     if (hiddenApps.size > 1) {
                         Button(
                             onClick = {
-                                if (isReadyToAcceptClicks) {
-                                    onUnhideAll()
-                                    onDismiss()
-                                }
+                                onUnhideAll()
+                                onDismiss()
                             },
                             shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
                             border = ButtonDefaults.border(
@@ -160,9 +143,7 @@ fun HiddenAppsModal(
                     }
 
                     Button(
-                        onClick = {
-                            if (isReadyToAcceptClicks) onDismiss()
-                        },
+                        onClick = onDismiss,
                         shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
                         border = ButtonDefaults.border(
                             border = Border(BorderStroke(1.dp, ButtonGlassBorder), shape = RoundedCornerShape(14.dp)),
@@ -204,16 +185,9 @@ fun HiddenAppsModal(
 private fun HiddenAppRowItem(
     app: AppInfo,
     focusRequester: FocusRequester?,
-    enabled: Boolean,
     onUnhide: () -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
-
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.03f else 1.0f,
-        animationSpec = tween(150),
-        label = "hiddenAppRowScale"
-    )
 
     val baseModifier = if (focusRequester != null) {
         Modifier
@@ -224,9 +198,7 @@ private fun HiddenAppRowItem(
     }
 
     Button(
-        onClick = {
-            if (enabled) onUnhide()
-        },
+        onClick = onUnhide,
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
         scale = ButtonDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
         border = ButtonDefaults.border(
@@ -238,9 +210,7 @@ private fun HiddenAppRowItem(
             focusedContainerColor = ButtonGlassFocusedBg
         ),
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        modifier = baseModifier
-            .fillMaxWidth()
-            .scale(scale)
+        modifier = baseModifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

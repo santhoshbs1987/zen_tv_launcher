@@ -83,7 +83,6 @@ fun HomeScreen(
     LaunchedEffect(selectedContextApp, showInputsModal, showHiddenAppsModal, reorderingPackage, uiState.isLoading) {
         val isOverlayOpen = selectedContextApp != null || showInputsModal || showHiddenAppsModal || reorderingPackage != null
         if (!isOverlayOpen && !uiState.isLoading) {
-            delay(150)
             try {
                 val targetPkg = lastFocusedPackage ?: displayApps.firstOrNull()?.packageName
                 if (targetPkg != null) {
@@ -226,7 +225,7 @@ fun HomeScreen(
             }
         }
 
-        // In-Hierarchy Modal Overlay: Context Menu (Hide, Rearrange, App Info, Uninstall)
+        // In-Hierarchy Modal Overlay: Context Menu (Hide, Rearrange, App Info)
         selectedContextApp?.let { app ->
             AppContextMenu(
                 app = app,
@@ -236,7 +235,6 @@ fun HomeScreen(
                 },
                 onToggleHide = { viewModel.toggleHideApp(app.packageName) },
                 onAppInfo = { viewModel.openAppInfo(context, app.packageName) },
-                onUninstall = { viewModel.uninstallApp(context, app.packageName) },
                 onDismiss = { selectedContextApp = null },
             )
         }

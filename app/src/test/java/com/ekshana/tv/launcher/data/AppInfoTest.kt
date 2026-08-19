@@ -9,14 +9,14 @@ import org.junit.Test
 class AppInfoTest {
 
     @Test
-    fun `AppInfo equality is based on packageName`() {
+    fun `AppInfo equality is based on data class properties`() {
         val app1 = AppInfo(
             label = "YouTube",
             packageName = "com.google.android.youtube.tv",
             iconBitmap = null
         )
         val app2 = AppInfo(
-            label = "YouTube TV Edition",
+            label = "YouTube",
             packageName = "com.google.android.youtube.tv",
             iconBitmap = null
         )

@@ -12,13 +12,6 @@ data class AppInfo(
     val packageName: String,
     val iconBitmap: ImageBitmap? = null,
 ) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is AppInfo) return false
-        return packageName == other.packageName
-    }
-
-    override fun hashCode(): Int = packageName.hashCode()
 
     companion object {
         // Shared 1x1 transparent placeholder for instant zero-alloc frame rendering

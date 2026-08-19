@@ -101,26 +101,42 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Triggers native Android TV app uninstall system confirmation dialog.
+     * Triggers native Android TV app uninstall system confirmation dialog with Leanback fallbacks.
      */
     fun uninstallApp(context: Context, packageName: String) {
-        val intent = Intent(Intent.ACTION_DELETE).apply {
-            data = Uri.fromParts("package", packageName, null)
-        }
-        startNativeIntent(context, intent, "Cannot uninstall this app")
+        val packageUri = Uri.fromParts("package", packageName, null)
+
+        // 1. Try Leanback / Android TV ACTION_UNINSTALL_PACKAGE
+        try {
+            val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE).apply {
+                data = packageUri
+                putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(uninstallIntent)
+            return
+        } catch (_: Exception) {}
+
+        // 2. Try standard ACTION_DELETE
+        try {
+            val deleteIntent = Intent(Intent.ACTION_DELETE).apply {
+                data = packageUri
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(deleteIntent)
+            return
+        } catch (_: Exception) {}
+
+        // 3. Fallback: Open App Info where the user can disable/uninstall or clear data
+        openAppInfo(context, packageName)
     }
 
     /**
-     * Tries Leanback (Android TV) launch intent first, falling back to standard launch intent.
+     * Uses pre-cached launch intent for instant zero-latency startup.
      */
     fun launchApp(context: Context, packageName: String) {
         setLastFocusedPackage(packageName)
-        val pm = context.packageManager
-        val tvIntent = pm.getLeanbackLaunchIntentForPackage(packageName)
-        val standardIntent = pm.getLaunchIntentForPackage(packageName)
-        val intent = tvIntent ?: standardIntent ?: return
-
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent = AppRepository.getLaunchIntent(packageName) ?: return
         try {
             context.startActivity(intent)
         } catch (_: Exception) { /* ignore */ }

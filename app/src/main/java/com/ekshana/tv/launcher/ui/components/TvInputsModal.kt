@@ -48,13 +48,10 @@ fun TvInputsModal(
     onDismiss: () -> Unit,
 ) {
     val firstItemRequester = remember { FocusRequester() }
-    var isReadyToAcceptClicks by remember { mutableStateOf(false) }
 
     BackHandler { onDismiss() }
 
     LaunchedEffect(Unit) {
-        delay(150)
-        isReadyToAcceptClicks = true
         try {
             firstItemRequester.requestFocus()
         } catch (_: Exception) { /* ignore */ }
@@ -63,16 +60,7 @@ fun TvInputsModal(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x99000000))
-            .onPreviewKeyEvent { keyEvent ->
-                if (!isReadyToAcceptClicks) {
-                    val code = keyEvent.nativeKeyEvent.keyCode
-                    if (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER || code == KeyEvent.KEYCODE_NUMPAD_ENTER) {
-                        return@onPreviewKeyEvent true
-                    }
-                }
-                false
-            },
+            .background(Color(0x99000000)),
         contentAlignment = Alignment.CenterEnd
     ) {
         // Native Right-Docked Drawer Sheet
@@ -146,12 +134,9 @@ fun TvInputsModal(
                         NativeTvInputRowItem(
                             input = input,
                             focusRequester = if (isFirst) firstItemRequester else null,
-                            enabled = isReadyToAcceptClicks,
                             onClick = {
-                                if (isReadyToAcceptClicks) {
-                                    onSelectInput(input)
-                                    onDismiss()
-                                }
+                                onSelectInput(input)
+                                onDismiss()
                             }
                         )
                     }
@@ -161,9 +146,7 @@ fun TvInputsModal(
 
                 // Footer / Back button
                 Button(
-                    onClick = {
-                        if (isReadyToAcceptClicks) onDismiss()
-                    },
+                    onClick = onDismiss,
                     shape = ButtonDefaults.shape(shape = RoundedCornerShape(12.dp)),
                     border = ButtonDefaults.border(
                         border = Border(BorderStroke(1.dp, Color(0x1FFFFFFF)), shape = RoundedCornerShape(12.dp)),
@@ -195,7 +178,6 @@ fun TvInputsModal(
 private fun NativeTvInputRowItem(
     input: TvInputItem,
     focusRequester: FocusRequester?,
-    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -209,9 +191,7 @@ private fun NativeTvInputRowItem(
     }
 
     Button(
-        onClick = {
-            if (enabled) onClick()
-        },
+        onClick = onClick,
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(14.dp)),
         scale = ButtonDefaults.scale(scale = 1.0f, focusedScale = 1.0f),
         border = ButtonDefaults.border(
